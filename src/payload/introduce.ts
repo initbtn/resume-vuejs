@@ -1,4 +1,6 @@
-export const introduce = {
+import type { IIntroduce } from './types'
+
+export const introduce: IIntroduce = {
   contents: [
     "비즈니스 프로세스의 병목을 소프트웨어와 데이터로 해결하는 4년 차 엔지니어입니다.",
     "이종 대외 API 연동, 결제·인증 트랜잭션 무결성 보장, 대규모 정산 백오피스 UI 및 클라우드 인프라 구축을 주도하며 서비스 안정성과 운영 효율성을 극대화해 왔습니다.",

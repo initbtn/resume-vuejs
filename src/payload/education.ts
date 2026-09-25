@@ -1,4 +1,6 @@
-export const education = {
+import type { IEducation } from './types'
+
+export const education: IEducation = {
   list: [
     {
       institution: "부산인재개발원 (부산IT교육센터)",

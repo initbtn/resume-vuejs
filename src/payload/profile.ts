@@ -1,4 +1,6 @@
-export const profile = {
+import type { IProfile } from './types'
+
+export const profile: IProfile = {
   name: "남성호",
   position: "Front-end & Full-stack Engineer",
   email: "min2spapa@gmail.com",

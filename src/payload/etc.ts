@@ -1,4 +1,6 @@
-export const etc = {
+import type { IEtc } from './types'
+
+export const etc: IEtc = {
   certifications: [
     { name: "정보처리기사", issuer: "한국산업인력공단", date: "2024.06" },
     { name: "일반제조시설안전관리자", issuer: "한국가스안전공사", date: "2017.06" },

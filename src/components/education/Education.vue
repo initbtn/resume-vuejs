@@ -1,17 +1,12 @@
-<script setup>
+<script setup lang="ts">
 import CommonSection from '../common/CommonSection.vue'
 import CommonRow from '../common/CommonRow.vue'
+import type { IEducation, IEtc } from '../../payload/types'
 
-defineProps({
-  educationPayload: {
-    type: Object,
-    required: true
-  },
-  etcPayload: {
-    type: Object,
-    required: true
-  }
-})
+defineProps<{
+  educationPayload: IEducation
+  etcPayload: IEtc
+}>()
 </script>
 
 <template>

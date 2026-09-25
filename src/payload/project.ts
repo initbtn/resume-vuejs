@@ -1,4 +1,6 @@
-export const project = {
+import type { IProject } from './types'
+
+export const project: IProject = {
   list: [
     {
       title: "Next.js 기반 이력서 웹 플랫폼의 Vue.js 프레임워크 포팅 (resume-vuejs)",

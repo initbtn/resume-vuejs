@@ -1,5 +1,5 @@
-<script setup>
-import Payload from './payload/index.js'
+<script setup lang="ts">
+import { Payload } from './payload'
 import Profile from './components/profile/Profile.vue'
 import Introduce from './components/introduce/Introduce.vue'
 import Skill from './components/skill/Skill.vue'

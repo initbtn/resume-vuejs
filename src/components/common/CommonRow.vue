@@ -1,9 +1,10 @@
-<script setup>
-defineProps({
-  index: {
-    type: Number,
-    default: 0
-  }
+<script setup lang="ts">
+export interface CommonRowProps {
+  index?: number
+}
+
+withDefaults(defineProps<CommonRowProps>(), {
+  index: 0
 })
 </script>
 

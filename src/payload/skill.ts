@@ -1,4 +1,6 @@
-export const skill = {
+import type { ISkill } from './types'
+
+export const skill: ISkill = {
   categories: [
     {
       category: "Front-end",

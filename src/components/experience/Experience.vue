@@ -1,13 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import CommonSection from '../common/CommonSection.vue'
 import CommonRow from '../common/CommonRow.vue'
+import type { IExperience } from '../../payload/types'
 
-defineProps({
-  payload: {
-    type: Object,
-    required: true
-  }
-})
+defineProps<{
+  payload: IExperience
+}>()
 </script>
 
 <template>

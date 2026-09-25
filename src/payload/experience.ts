@@ -1,4 +1,6 @@
-export const experience = {
+import type { IExperience } from './types'
+
+export const experience: IExperience = {
   list: [
     {
       company: "(주)리트러스트",
