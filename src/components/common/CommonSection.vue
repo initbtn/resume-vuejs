@@ -1,10 +1,9 @@
-<script setup>
-defineProps({
-  title: {
-    type: String,
-    required: true
-  }
-})
+<script setup lang="ts">
+export interface CommonSectionProps {
+  title: string
+}
+
+defineProps<CommonSectionProps>()
 </script>
 
 <template>

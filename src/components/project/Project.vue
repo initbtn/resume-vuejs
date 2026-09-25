@@ -1,13 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import CommonSection from '../common/CommonSection.vue'
 import CommonRow from '../common/CommonRow.vue'
+import type { IProject } from '../../payload/types'
 
-defineProps({
-  payload: {
-    type: Object,
-    required: true
-  }
-})
+defineProps<{
+  payload: IProject
+}>()
 </script>
 
 <template>

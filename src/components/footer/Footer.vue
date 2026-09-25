@@ -1,10 +1,9 @@
-<script setup>
-defineProps({
-  payload: {
-    type: Object,
-    required: true
-  }
-})
+<script setup lang="ts">
+import type { IFooter } from '../../payload/types'
+
+defineProps<{
+  payload: IFooter
+}>()
 </script>
 
 <template>
