@@ -1,4 +1,6 @@
-export const education = {
+import { IEducation } from './types.ts'
+
+export const education: IEducation.Payload = {
   list: [
     {
       institution: "부산인재개발원 (부산IT교육센터)",

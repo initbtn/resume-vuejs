@@ -1,4 +1,6 @@
-export const project = {
+import { IProject } from './types.ts'
+
+export const project: IProject.Payload = {
   list: [
     {
       title: "Next.js 기반 이력서 웹 플랫폼의 Vue.js 프레임워크 포팅 (resume-vuejs)",

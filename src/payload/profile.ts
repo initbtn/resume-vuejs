@@ -1,4 +1,6 @@
-export const profile = {
+import { IProfile } from './types.ts'
+
+export const profile: IProfile.Payload = {
   name: "남성호",
   position: "Front-end & Full-stack Engineer",
   email: "min2spapa@gmail.com",

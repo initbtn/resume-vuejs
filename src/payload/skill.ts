@@ -1,4 +1,6 @@
-export const skill = {
+import { ISkill } from './types.ts'
+
+export const skill: ISkill.Payload = {
   categories: [
     {
       category: "Front-end",

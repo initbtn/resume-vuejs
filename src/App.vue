@@ -1,5 +1,5 @@
-<script setup>
-import Payload from './payload/index.js'
+<script setup lang="ts">
+import { Payload } from './payload/index.ts'
 import Profile from './components/profile/Profile.vue'
 import Introduce from './components/introduce/Introduce.vue'
 import Skill from './components/skill/Skill.vue'
@@ -11,7 +11,6 @@ import Footer from './components/footer/Footer.vue'
 
 <template>
   <div class="resume-container max-w-4xl mx-auto px-4 py-8 text-gray-800">
-    <!-- Component-driven orchestration identical to resume-nextjs /pages/index.tsx -->
     <Profile :payload="Payload.profile" />
     <Introduce :payload="Payload.introduce" />
     <Skill :payload="Payload.skill" />

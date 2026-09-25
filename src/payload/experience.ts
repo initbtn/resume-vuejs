@@ -1,4 +1,6 @@
-export const experience = {
+import { IExperience } from './types.ts'
+
+export const experience: IExperience.Payload = {
   list: [
     {
       company: "(주)리트러스트",
