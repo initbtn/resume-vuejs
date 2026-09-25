@@ -8,7 +8,7 @@
 | :--- | :--- | :--- |
 | **issue(◦)** | **버그·기능 추가 = 필수**, 사소한 수정 선택 | GitHub 이슈 선등록 (`publish-issue`), PR 시 `closes #N` 연결 |
 | **착수 표시(◦)** | **켠다** | `gh issue edit <N> --add-assignee @me` |
-| **프로젝트(◦)** | **없음** (추후 GitHub Projects 연결 시 번호 기재) | 보드 자동 전이 미사용 |
+| **프로젝트(◦)** | **Project 1 (`resume-vuejs`)** (owner: `@me`)<br>Status: `Todo` $\rightarrow$ `In Progress` $\rightarrow$ `Done` | `PVT_kwHOB44Dic4Bkrc3` (보드 자동 전이) |
 | **마일스톤** | **버전 차수별 사용** (`v1.0.0`, `v1.1.0` 등) | repo 스코프 마일스톤 연결 |
 | **worktree(①)** | 브랜치 분기 (`feat/*`, `fix/*`) | 표준 Git 피처 브랜치 격리 |
 | **토큰(⓪⑤⑥⑧)** | `GH_TOKEN="$(pass show github.com/initbtn)"` | GitHub API 및 인증 토큰 동적 주입 |
