@@ -1,10 +1,12 @@
-<script setup>
-defineProps({
-  index: {
-    type: Number,
-    default: 0
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    index?: number
+  }>(),
+  {
+    index: 0
   }
-})
+)
 </script>
 
 <template>

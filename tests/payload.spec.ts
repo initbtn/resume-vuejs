@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { Payload } from '../src/payload/index.ts'
+import type { ISkill } from '../src/payload/types.ts'
 
 describe('TDD: Payload Data & TypeScript Definition', () => {
   it('Profile 필수 필드(name, position, email, phone)가 유효해야 한다', () => {
@@ -24,7 +25,7 @@ describe('TDD: Payload Data & TypeScript Definition', () => {
 
   it('Skill 도메인이 4개 카테고리로 분류되어 있어야 한다', () => {
     expect(Payload.skill.categories.length).toBe(4)
-    const names = Payload.skill.categories.map((c: any) => c.category)
+    const names = Payload.skill.categories.map((c: ISkill.Category) => c.category)
     expect(names).toContain('Front-end')
     expect(names).toContain('Domain Knowledge')
   })
