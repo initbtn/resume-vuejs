@@ -41,4 +41,25 @@ describe('Payload Domain Integrity & 5 Key KPIs', () => {
     expect(allAchievements.some((a) => a.includes('15분 이내'))).toBe(true)
     expect(allAchievements.some((a) => a.includes('장애 대응 리드타임을 평균 15분 이내로 약 80% 이상 단축'))).toBe(true)
   })
+
+  it('should have accurate 2026 project schedules and planned status for marine GIS platform', () => {
+    const projects = Payload.project.list
+
+    // 프로젝트 기간에 2024년 오표기가 없어야 함
+    const has2024 = projects.some((p) => p.period.includes('2024'))
+    expect(has2024).toBe(false)
+
+    // resume-vuejs 프로젝트는 2026년 진행 중이어야 함
+    const resumeVue = projects.find((p) => p.title.includes('resume-vuejs'))
+    expect(resumeVue).toBeDefined()
+    expect(resumeVue?.period).toContain('2026')
+    expect(resumeVue?.period).toContain('현재')
+
+    // 해양 관제 플랫폼은 2026년 주제선정/기획 상태여야 함
+    const marineGis = projects.find((p) => p.title.includes('해양 친환경 설비'))
+    expect(marineGis).toBeDefined()
+    expect(marineGis?.period).toContain('2026')
+    expect(marineGis?.period).toMatch(/주제선정|기획/)
+    expect(marineGis?.description).toMatch(/주제선정|기획/)
+  })
 })
