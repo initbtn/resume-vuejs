@@ -46,31 +46,119 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
     error.value = null
 
     try {
-      // 8대 도메인 중 profile 등 원격 테이블 조회 시도
-      const { data: profileData, error: profileError } = await (activeClient as any)
-        .from('profile')
-        .select('*')
-        .maybeSingle()
-
-      if (profileError) {
-        throw profileError
-      }
+      // 8대 도메인 병렬 조회 시도
+      const [
+        profileRes,
+        introduceRes,
+        skillRes,
+        experienceRes,
+        projectRes,
+        educationRes,
+        etcRes,
+        footerRes
+      ] = await Promise.all([
+        (activeClient as any).from('profile').select('*').maybeSingle(),
+        (activeClient as any).from('introduce').select('*').maybeSingle(),
+        (activeClient as any).from('skill').select('*').order('order_index', { ascending: true }),
+        (activeClient as any).from('experience').select('*').order('order_index', { ascending: true }),
+        (activeClient as any).from('project').select('*').order('order_index', { ascending: true }),
+        (activeClient as any).from('education').select('*').order('order_index', { ascending: true }),
+        (activeClient as any).from('etc').select('*').order('order_index', { ascending: true }),
+        (activeClient as any).from('footer').select('*').maybeSingle()
+      ])
 
       let hasRemoteData = false
 
-      if (profileData) {
+      if (profileRes?.data) {
         data.value.profile = {
-          ...data.value.profile,
-          ...profileData
+          name: profileRes.data.name,
+          position: profileRes.data.position,
+          email: profileRes.data.email,
+          phone: profileRes.data.phone,
+          github: profileRes.data.github,
+          location: profileRes.data.location
         }
         hasRemoteData = true
       }
 
-      if (hasRemoteData) {
-        source.value = 'supabase'
-      } else {
-        source.value = 'fallback'
+      if (introduceRes?.data && introduceRes.data.contents?.length > 0) {
+        data.value.introduce = {
+          contents: introduceRes.data.contents
+        }
+        hasRemoteData = true
       }
+
+      if (skillRes?.data && skillRes.data.length > 0) {
+        data.value.skill = {
+          categories: skillRes.data.map((item: any) => ({
+            category: item.category,
+            items: item.items
+          }))
+        }
+        hasRemoteData = true
+      }
+
+      if (experienceRes?.data && experienceRes.data.length > 0) {
+        data.value.experience = {
+          list: experienceRes.data.map((item: any) => ({
+            company: item.company,
+            position: item.position,
+            period: item.period,
+            description: item.description ?? undefined,
+            projects: Array.isArray(item.projects) ? item.projects : []
+          }))
+        }
+        hasRemoteData = true
+      }
+
+      if (projectRes?.data && projectRes.data.length > 0) {
+        data.value.project = {
+          list: projectRes.data.map((item: any) => ({
+            title: item.title,
+            period: item.period,
+            where: item.where ?? undefined,
+            description: item.description ?? undefined,
+            achievements: item.achievements ?? [],
+            skills: item.skills ?? [],
+            link: item.link ?? undefined
+          }))
+        }
+        hasRemoteData = true
+      }
+
+      if (educationRes?.data && educationRes.data.length > 0) {
+        data.value.education = {
+          list: educationRes.data.map((item: any) => ({
+            institution: item.institution,
+            course: item.course,
+            period: item.period
+          }))
+        }
+        hasRemoteData = true
+      }
+
+      if (etcRes?.data && etcRes.data.length > 0) {
+        data.value.etc = {
+          certifications: etcRes.data.map((item: any) => ({
+            name: item.name,
+            issuer: item.issuer,
+            date: item.date
+          }))
+        }
+        hasRemoteData = true
+      }
+
+      if (footerRes?.data) {
+        data.value.footer = {
+          sign: footerRes.data.sign,
+          since: footerRes.data.since,
+          github: footerRes.data.github,
+          originalRepo: footerRes.data.originalRepo ?? undefined
+        }
+        hasRemoteData = true
+      }
+
+      source.value = hasRemoteData ? 'supabase' : 'fallback'
     } catch (err) {
       error.value = err instanceof Error ? err : new Error(String(err))
       source.value = 'fallback'
