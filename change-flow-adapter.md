@@ -23,4 +23,7 @@
 | **cleanup(⑨)** | 로컬 및 원격 피처 브랜치 정리 | 머지 후 `main` 브랜치 동기화 |
 | **배포(⑩)** | GitHub Actions $\rightarrow$ GitHub Pages (`gh-pages`) | `main` 머지 시 자동 빌드 배포 |
 | **Supabase 배선** | pass on-demand 자격증명 주입 | `token`: `pass show supabase.com/token-min2spapa`<br>`db-pass`: `pass show supabase.com/passward-db`<br>`ref`: `rhkrhkxrnpfnrqxwjojo` |
+| **보안 (Network Restrictions)** | 개발자 공인 IP CIDR 화이트리스트 | DB 직접 연결(5432/6543) 제한 (`scripts/supabase.sh network-allow-ip`, `network-restrictions get`) |
+| **보안 (CORS & URL)** | 허용 Origin 명시 | `site_url`: `https://initbtn.github.io/resume-vuejs/`<br>`uri_allow_list`: `http://localhost:5173,https://initbtn.github.io/**` |
 | **warming** | pass / gpg-agent | 자격 증명 캐시 상태 점검 후 실행 |
+
