@@ -10,11 +10,13 @@ import Project from './components/project/Project.vue'
 import Education from './components/education/Education.vue'
 import Footer from './components/footer/Footer.vue'
 import LoginModal from './components/admin/LoginModal.vue'
+import CmsModal from './components/admin/CmsModal.vue'
 
-const { data: resumeData } = useResumeData({ autoFetch: true })
+const { data: resumeData, fetchData: fetchResumeData } = useResumeData({ autoFetch: true })
 const { user, isAuthenticated, loading: authLoading, error: authError, signIn, signOut } = useAuth()
 
 const isLoginModalOpen = ref(false)
+const isCmsModalOpen = ref(false)
 const loginErrorMessage = ref<string | null>(null)
 
 const openLoginModal = () => {
@@ -38,6 +40,7 @@ const handleLogin = async (credentials: { email: string; password: string }) => 
 }
 
 const handleSignOut = async () => {
+  isCmsModalOpen.value = false
   await signOut()
 }
 </script>
@@ -56,6 +59,14 @@ const handleSignOut = async () => {
         <span class="text-indigo-200 text-xs hidden sm:inline">| {{ user?.email }}</span>
       </div>
       <div class="flex items-center space-x-3">
+        <button
+          data-testid="open-cms-button"
+          type="button"
+          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-xs rounded transition-colors text-white font-semibold shadow-sm flex items-center space-x-1"
+          @click="isCmsModalOpen = true"
+        >
+          <span>🛠️ 데이터 편집 (CMS)</span>
+        </button>
         <button
           data-testid="admin-logout-button"
           type="button"
@@ -108,6 +119,14 @@ const handleSignOut = async () => {
       :error-message="loginErrorMessage || (authError ? authError.message : null)"
       @close="closeLoginModal"
       @submit="handleLogin"
+    />
+
+    <!-- Admin CMS Modal Dialog -->
+    <CmsModal
+      :is-open="isCmsModalOpen"
+      :initial-data="resumeData"
+      :on-refetch="fetchResumeData"
+      @close="isCmsModalOpen = false"
     />
   </div>
 </template>
