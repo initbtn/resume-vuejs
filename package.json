@@ -12,6 +12,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "vue": "^3.4.15"
   },
   "devDependencies": {
