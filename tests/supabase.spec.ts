@@ -167,5 +167,83 @@ describe('Supabase Client & Composable (Milestone 2 - Issue #4)', () => {
       expect(scriptContent).toContain('network-restrictions/apply')
     })
   })
+
+  describe('Frontend Supabase Integration & 8 Domains Fetching (Milestone 2 - Issue #14)', () => {
+    it('deploy.yml 워크플로의 빌드 스텝에 VITE_SUPABASE_URL 및 VITE_SUPABASE_ANON_KEY가 주입되어야 한다', async () => {
+      const fs = await import('fs')
+      const path = await import('path')
+
+      const workflowFile = path.resolve(__dirname, '../.github/workflows/deploy.yml')
+      expect(fs.existsSync(workflowFile)).toBe(true)
+
+      const workflowContent = fs.readFileSync(workflowFile, 'utf-8')
+      expect(workflowContent).toContain('VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}')
+      expect(workflowContent).toContain('VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}')
+    })
+
+    it('useResumeData 호출 시 8대 도메인 테이블 전체를 조회해야 한다', async () => {
+      const queriedTables: string[] = []
+      const mockQueryBuilder = {
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        order: vi.fn().mockResolvedValue({ data: [], error: null })
+      }
+      const mockClient = {
+        from: vi.fn().mockImplementation((table: string) => {
+          queriedTables.push(table)
+          return {
+            select: vi.fn().mockReturnValue(mockQueryBuilder)
+          }
+        })
+      } as any
+
+      const { fetchData } = useResumeData({
+        client: mockClient
+      })
+
+      await fetchData()
+
+      const expectedDomains = ['profile', 'introduce', 'skill', 'experience', 'project', 'education', 'etc', 'footer']
+      for (const domain of expectedDomains) {
+        expect(queriedTables).toContain(domain)
+      }
+    })
+
+    it('Supabase에서 { data: null, error } 형태의 API 에러 반환 시 error.value에 에러를 기록하고 fallback되어야 한다', async () => {
+      const postgrestError = {
+        message: 'permission denied for table skill',
+        details: null,
+        hint: null,
+        code: '42501'
+      }
+
+      const mockClient = {
+        from: vi.fn().mockImplementation((table: string) => {
+          return {
+            select: vi.fn().mockReturnValue({
+              maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+              order: vi.fn().mockResolvedValue(
+                table === 'skill'
+                  ? { data: null, error: postgrestError }
+                  : { data: [], error: null }
+              )
+            })
+          }
+        })
+      } as any
+
+      const { data, loading, error, source, fetchData } = useResumeData({
+        client: mockClient
+      })
+
+      await fetchData()
+
+      expect(data.value.skill.categories).toEqual(Payload.skill.categories)
+      expect(source.value).toBe('fallback')
+      expect(error.value).not.toBeNull()
+      expect(error.value?.message).toContain('permission denied for table skill')
+      expect(loading.value).toBe(false)
+    })
+  })
 })
+
 
