@@ -16,3 +16,5 @@ supabase/.temp/
 *.sln
 *.sw?
 .claude
+.temp*
+
