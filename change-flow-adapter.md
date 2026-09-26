@@ -22,5 +22,5 @@
 | **merge 모델(⑧)** | **squash-only** | 단독 owner, 사람 머지 게이트 준수 (명시 승인 시에만) |
 | **cleanup(⑨)** | 로컬 및 원격 피처 브랜치 정리 | 머지 후 `main` 브랜치 동기화 |
 | **배포(⑩)** | GitHub Actions $\rightarrow$ GitHub Pages (`gh-pages`) | `main` 머지 시 자동 빌드 배포 |
-| **Supabase 배선** | pass on-demand 자격증명 주입 | `token`: `pass show supabase.com/token-min2spapa`<br>`db-pass`: `pass show supabase.com/passward-db`<br>`ref`: `xwhscesqufkgpqqjvhvq` |
+| **Supabase 배선** | pass on-demand 자격증명 주입 | `token`: `pass show supabase.com/token-min2spapa`<br>`db-pass`: `pass show supabase.com/passward-db`<br>`ref`: `rhkrhkxrnpfnrqxwjojo` |
 | **warming** | pass / gpg-agent | 자격 증명 캐시 상태 점검 후 실행 |
