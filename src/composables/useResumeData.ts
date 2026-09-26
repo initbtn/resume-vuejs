@@ -113,6 +113,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
       if (skillRes?.data && skillRes.data.length > 0) {
         data.value.skill = {
           categories: skillRes.data.map((row: any) => ({
+            id: row.id,
             category: row.category,
             items: row.items || []
           }))
@@ -123,6 +124,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
       if (experienceRes?.data && experienceRes.data.length > 0) {
         data.value.experience = {
           list: experienceRes.data.map((row: any) => ({
+            id: row.id,
             company: row.company,
             position: row.position,
             period: row.period,
@@ -136,6 +138,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
       if (projectRes?.data && projectRes.data.length > 0) {
         data.value.project = {
           list: projectRes.data.map((row: any) => ({
+            id: row.id,
             title: row.title,
             period: row.period,
             where: row.where || undefined,
@@ -151,6 +154,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
       if (educationRes?.data && educationRes.data.length > 0) {
         data.value.education = {
           list: educationRes.data.map((row: any) => ({
+            id: row.id,
             institution: row.institution,
             course: row.course,
             period: row.period
@@ -162,6 +166,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
       if (etcRes?.data && etcRes.data.length > 0) {
         data.value.etc = {
           certifications: etcRes.data.map((row: any) => ({
+            id: row.id,
             name: row.name,
             issuer: row.issuer,
             date: row.date

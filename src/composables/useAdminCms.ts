@@ -1,23 +1,33 @@
 import { ref } from 'vue'
 import { supabase, type TypedSupabaseClient } from '../lib/supabase'
+import type { Database } from '../types/database.types'
 
 export interface UseAdminCmsOptions {
   client?: TypedSupabaseClient | null
   onSuccess?: () => Promise<void> | void
 }
 
-export interface CmsOperationResult {
+export interface CmsOperationResult<T = any> {
   success: boolean
   error?: Error | null
-  data?: any
+  data?: T
 }
+
+type ProfileInsert = Database['public']['Tables']['profile']['Insert']
+type IntroduceInsert = Database['public']['Tables']['introduce']['Insert']
+type SkillInsert = Database['public']['Tables']['skill']['Insert']
+type ExperienceInsert = Database['public']['Tables']['experience']['Insert']
+type ProjectInsert = Database['public']['Tables']['project']['Insert']
+type EducationInsert = Database['public']['Tables']['education']['Insert']
+type EtcInsert = Database['public']['Tables']['etc']['Insert']
+type FooterInsert = Database['public']['Tables']['footer']['Insert']
 
 export function useAdminCms(options: UseAdminCmsOptions = {}) {
   const client = options.client !== undefined ? options.client : supabase
   const loading = ref<boolean>(false)
   const error = ref<Error | null>(null)
 
-  const handleSuccess = async (data?: any): Promise<CmsOperationResult> => {
+  const handleSuccess = async <T>(data?: T): Promise<CmsOperationResult<T>> => {
     error.value = null
     if (options.onSuccess) {
       await options.onSuccess()
@@ -36,12 +46,12 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     name: string
     position: string
     email: string
-    phone: string
-    github: string
-    location: string
+    phone?: string
+    github?: string
+    location?: string
   }): Promise<CmsOperationResult> => {
     error.value = null
-    if (!payload.name || !payload.position || !payload.email) {
+    if (!payload.name?.trim() || !payload.position?.trim() || !payload.email?.trim()) {
       return handleError(new Error('이름, 포지션, 이메일 등 필수 항목을 모두 입력해주세요.'))
     }
 
@@ -51,22 +61,19 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
 
     try {
       loading.value = true
-      const { data, error: dbError } = await client
-        .from('profile')
-        .upsert({
-          id: 'default',
-          name: payload.name.trim(),
-          position: payload.position.trim(),
-          email: payload.email.trim(),
-          phone: payload.phone?.trim() || '',
-          github: payload.github?.trim() || '',
-          location: payload.location?.trim() || '',
-          updated_at: new Date().toISOString()
-        })
-
-      if (dbError) {
-        return handleError(dbError)
+      const row: ProfileInsert = {
+        id: 'default',
+        name: payload.name.trim(),
+        position: payload.position.trim(),
+        email: payload.email.trim(),
+        phone: payload.phone?.trim() || '',
+        github: payload.github?.trim() || '',
+        location: payload.location?.trim() || '',
+        updated_at: new Date().toISOString()
       }
+
+      const { data, error: dbError } = await client.from('profile').upsert(row)
+      if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
       return handleError(err)
@@ -78,23 +85,18 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
   // 2. Introduce Update
   const updateIntroduce = async (contents: string[]): Promise<CmsOperationResult> => {
     error.value = null
-    if (!client) {
-      return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
-    }
+    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
 
     try {
       loading.value = true
-      const { data, error: dbError } = await client
-        .from('introduce')
-        .upsert({
-          id: 'default',
-          contents: contents.filter(c => c.trim().length > 0),
-          updated_at: new Date().toISOString()
-        })
-
-      if (dbError) {
-        return handleError(dbError)
+      const row: IntroduceInsert = {
+        id: 'default',
+        contents: contents.filter(c => c.trim().length > 0),
+        updated_at: new Date().toISOString()
       }
+
+      const { data, error: dbError } = await client.from('introduce').upsert(row)
+      if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
       return handleError(err)
@@ -103,7 +105,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     }
   }
 
-  // 3. Skill Category Save / Delete
+  // 3. Skill Save / Delete
   const saveSkill = async (category: {
     id?: number
     category: string
@@ -114,20 +116,18 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     if (!category.category.trim()) {
       return handleError(new Error('카테고리 이름을 입력해주세요.'))
     }
-    if (!client) {
-      return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
-    }
+    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
 
     try {
       loading.value = true
-      const row: any = {
+      const row: SkillInsert = {
         category: category.category.trim(),
         items: category.items,
         order_index: category.order_index ?? 0,
         updated_at: new Date().toISOString()
       }
       if (category.id !== undefined) {
-        row.id = category.id
+        row.id = category.id as never
       }
 
       const { data, error: dbError } = await client.from('skill').upsert(row)
@@ -161,7 +161,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     position: string
     period: string
     description?: string | null
-    projects?: any[]
+    projects?: any
     order_index?: number
   }): Promise<CmsOperationResult> => {
     error.value = null
@@ -172,7 +172,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
 
     try {
       loading.value = true
-      const row: any = {
+      const row: ExperienceInsert = {
         company: exp.company.trim(),
         position: exp.position.trim(),
         period: exp.period.trim(),
@@ -182,7 +182,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         updated_at: new Date().toISOString()
       }
       if (exp.id !== undefined) {
-        row.id = exp.id
+        row.id = exp.id as never
       }
 
       const { data, error: dbError } = await client.from('experience').upsert(row)
@@ -229,7 +229,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
 
     try {
       loading.value = true
-      const row: any = {
+      const row: ProjectInsert = {
         title: proj.title.trim(),
         period: proj.period.trim(),
         where: proj.where || null,
@@ -241,7 +241,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         updated_at: new Date().toISOString()
       }
       if (proj.id !== undefined) {
-        row.id = proj.id
+        row.id = proj.id as never
       }
 
       const { data, error: dbError } = await client.from('project').upsert(row)
@@ -268,33 +268,31 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     }
   }
 
-  // 6. Education Save / Delete
+  // 6. Education Save / Delete (Columns: institution, course, period)
   const saveEducation = async (edu: {
     id?: number
-    name: string
-    major: string
+    institution: string
+    course: string
     period: string
-    description?: string | null
     order_index?: number
   }): Promise<CmsOperationResult> => {
     error.value = null
-    if (!edu.name.trim() || !edu.period.trim()) {
-      return handleError(new Error('기관명과 기간은 필수 항목입니다.'))
+    if (!edu.institution.trim() || !edu.course.trim() || !edu.period.trim()) {
+      return handleError(new Error('기관명, 과정명, 기간은 필수 항목입니다.'))
     }
     if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
 
     try {
       loading.value = true
-      const row: any = {
-        name: edu.name.trim(),
-        major: edu.major.trim(),
+      const row: EducationInsert = {
+        institution: edu.institution.trim(),
+        course: edu.course.trim(),
         period: edu.period.trim(),
-        description: edu.description || null,
         order_index: edu.order_index ?? 0,
         updated_at: new Date().toISOString()
       }
       if (edu.id !== undefined) {
-        row.id = edu.id
+        row.id = edu.id as never
       }
 
       const { data, error: dbError } = await client.from('education').upsert(row)
@@ -321,31 +319,31 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     }
   }
 
-  // 7. Etc Save / Delete
+  // 7. Etc Save / Delete (Columns: name, issuer, date)
   const saveEtc = async (item: {
     id?: number
-    title: string
-    period: string
-    description?: string | null
+    name: string
+    issuer: string
+    date: string
     order_index?: number
   }): Promise<CmsOperationResult> => {
     error.value = null
-    if (!item.title.trim() || !item.period.trim()) {
-      return handleError(new Error('제목과 기간은 필수 항목입니다.'))
+    if (!item.name.trim() || !item.issuer.trim() || !item.date.trim()) {
+      return handleError(new Error('자격증/활동명, 발급처, 취득일은 필수 항목입니다.'))
     }
     if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
 
     try {
       loading.value = true
-      const row: any = {
-        title: item.title.trim(),
-        period: item.period.trim(),
-        description: item.description || null,
+      const row: EtcInsert = {
+        name: item.name.trim(),
+        issuer: item.issuer.trim(),
+        date: item.date.trim(),
         order_index: item.order_index ?? 0,
         updated_at: new Date().toISOString()
       }
       if (item.id !== undefined) {
-        row.id = item.id
+        row.id = item.id as never
       }
 
       const { data, error: dbError } = await client.from('etc').upsert(row)
@@ -380,21 +378,23 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     originalRepo?: string | null
   }): Promise<CmsOperationResult> => {
     error.value = null
+    if (!payload.github?.trim() || !payload.sign?.trim()) {
+      return handleError(new Error('GitHub 링크와 서명 문구는 필수 항목입니다.'))
+    }
     if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
 
     try {
       loading.value = true
-      const { data, error: dbError } = await client
-        .from('footer')
-        .upsert({
-          id: 'default',
-          github: payload.github.trim(),
-          sign: payload.sign.trim(),
-          since: payload.since ?? new Date().getFullYear(),
-          originalRepo: payload.originalRepo || null,
-          updated_at: new Date().toISOString()
-        })
+      const row: FooterInsert = {
+        id: 'default',
+        github: payload.github.trim(),
+        sign: payload.sign.trim(),
+        since: payload.since ?? new Date().getFullYear(),
+        originalRepo: payload.originalRepo || null,
+        updated_at: new Date().toISOString()
+      }
 
+      const { data, error: dbError } = await client.from('footer').upsert(row)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {

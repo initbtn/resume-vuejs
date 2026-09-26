@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, reactive } from 'vue'
 import { useAdminCms } from '../../composables/useAdminCms'
+import type { PayloadType } from '../../payload/types'
 
 interface Props {
   isOpen: boolean
-  initialData?: any
+  initialData?: PayloadType
   onRefetch?: () => Promise<void> | void
 }
 
@@ -15,6 +16,7 @@ const emit = defineEmits<{
 
 const activeTab = ref<'profile' | 'introduce' | 'skill' | 'experience' | 'project' | 'education' | 'etc' | 'footer'>('profile')
 const feedbackMessage = ref<{ type: 'success' | 'error'; text: string } | null>(null)
+let feedbackTimer: ReturnType<typeof setTimeout> | null = null
 
 const {
   loading,
@@ -54,8 +56,8 @@ const introduceText = ref('')
 const newSkill = reactive({ category: '', items: '' })
 const newExp = reactive({ company: '', position: '', period: '', description: '' })
 const newProj = reactive({ title: '', period: '', where: '', description: '' })
-const newEdu = reactive({ name: '', major: '', period: '' })
-const newEtc = reactive({ title: '', period: '', description: '' })
+const newEdu = reactive({ institution: '', course: '', period: '' })
+const newEtc = reactive({ name: '', issuer: '', date: '' })
 
 const footerForm = reactive({
   github: '',
@@ -90,9 +92,13 @@ watch(
 )
 
 const showFeedback = (type: 'success' | 'error', text: string) => {
+  if (feedbackTimer) {
+    clearTimeout(feedbackTimer)
+  }
   feedbackMessage.value = { type, text }
-  setTimeout(() => {
+  feedbackTimer = setTimeout(() => {
     feedbackMessage.value = null
+    feedbackTimer = null
   }, 4000)
 }
 
@@ -169,12 +175,12 @@ const handleDeleteProject = async (id: number) => {
 }
 
 const handleAddEducation = async () => {
-  if (!newEdu.name.trim()) return
+  if (!newEdu.institution.trim() || !newEdu.course.trim()) return
   const res = await saveEducation(newEdu)
   if (res.success) {
     showFeedback('success', '학력 사항이 추가되었습니다.')
-    newEdu.name = ''
-    newEdu.major = ''
+    newEdu.institution = ''
+    newEdu.course = ''
     newEdu.period = ''
   } else {
     showFeedback('error', res.error?.message || '학력 추가 실패')
@@ -188,13 +194,13 @@ const handleDeleteEducation = async (id: number) => {
 }
 
 const handleAddEtc = async () => {
-  if (!newEtc.title.trim()) return
+  if (!newEtc.name.trim() || !newEtc.issuer.trim()) return
   const res = await saveEtc(newEtc)
   if (res.success) {
     showFeedback('success', '기타/자격증 항목이 추가되었습니다.')
-    newEtc.title = ''
-    newEtc.period = ''
-    newEtc.description = ''
+    newEtc.name = ''
+    newEtc.issuer = ''
+    newEtc.date = ''
   } else {
     showFeedback('error', res.error?.message || '기타 추가 실패')
   }
@@ -374,9 +380,9 @@ const handleSaveFooter = async () => {
           <div class="flex justify-end">
             <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold" @click="handleAddExperience">경력 추가</button>
           </div>
-          <div v-if="initialData?.experience?.length" class="space-y-2 pt-2">
+          <div v-if="initialData?.experience?.list?.length" class="space-y-2 pt-2">
             <div
-              v-for="(exp, idx) in initialData.experience"
+              v-for="(exp, idx) in initialData.experience.list"
               :key="idx"
               class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center"
             >
@@ -400,9 +406,9 @@ const handleSaveFooter = async () => {
           <div class="flex justify-end">
             <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold" @click="handleAddProject">프로젝트 추가</button>
           </div>
-          <div v-if="initialData?.project?.length" class="space-y-2 pt-2">
+          <div v-if="initialData?.project?.list?.length" class="space-y-2 pt-2">
             <div
-              v-for="(proj, idx) in initialData.project"
+              v-for="(proj, idx) in initialData.project.list"
               :key="idx"
               class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center"
             >
@@ -419,20 +425,20 @@ const handleSaveFooter = async () => {
         <div v-if="activeTab === 'education'" class="space-y-4">
           <h3 class="text-base font-bold text-gray-900 border-b pb-2">학력 목록</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <input v-model="newEdu.name" type="text" placeholder="기관/대학명" class="px-3 py-2 border rounded-lg text-sm" />
-            <input v-model="newEdu.major" type="text" placeholder="전공" class="px-3 py-2 border rounded-lg text-sm" />
+            <input v-model="newEdu.institution" type="text" placeholder="기관/대학명" class="px-3 py-2 border rounded-lg text-sm" />
+            <input v-model="newEdu.course" type="text" placeholder="과정/전공" class="px-3 py-2 border rounded-lg text-sm" />
             <input v-model="newEdu.period" type="text" placeholder="기간" class="px-3 py-2 border rounded-lg text-sm" />
           </div>
           <div class="flex justify-end">
             <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold" @click="handleAddEducation">학력 추가</button>
           </div>
-          <div v-if="initialData?.education?.length" class="space-y-2 pt-2">
+          <div v-if="initialData?.education?.list?.length" class="space-y-2 pt-2">
             <div
-              v-for="(edu, idx) in initialData.education"
+              v-for="(edu, idx) in initialData.education.list"
               :key="idx"
               class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center"
             >
-              <span class="font-bold text-sm">{{ edu.name }} ({{ edu.major }})</span>
+              <span class="font-bold text-sm">{{ edu.institution }} ({{ edu.course }})</span>
               <button v-if="edu.id" type="button" class="text-xs text-red-600 hover:underline" @click="handleDeleteEducation(edu.id)">삭제</button>
             </div>
           </div>
@@ -442,17 +448,20 @@ const handleSaveFooter = async () => {
         <div v-if="activeTab === 'etc'" class="space-y-4">
           <h3 class="text-base font-bold text-gray-900 border-b pb-2">기타 / 자격증 목록</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <input v-model="newEtc.title" type="text" placeholder="자격증/활동명" class="px-3 py-2 border rounded-lg text-sm" />
-            <input v-model="newEtc.period" type="text" placeholder="취득일/기간" class="px-3 py-2 border rounded-lg text-sm" />
+            <input v-model="newEtc.name" type="text" placeholder="자격증/활동명" class="px-3 py-2 border rounded-lg text-sm" />
+            <input v-model="newEtc.issuer" type="text" placeholder="발급처" class="px-3 py-2 border rounded-lg text-sm" />
+            <input v-model="newEtc.date" type="text" placeholder="취득일" class="px-3 py-2 border rounded-lg text-sm" />
+          </div>
+          <div class="flex justify-end">
             <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold" @click="handleAddEtc">기타 추가</button>
           </div>
-          <div v-if="initialData?.etc?.length" class="space-y-2 pt-2">
+          <div v-if="initialData?.etc?.certifications?.length" class="space-y-2 pt-2">
             <div
-              v-for="(item, idx) in initialData.etc"
+              v-for="(item, idx) in initialData.etc.certifications"
               :key="idx"
               class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center"
             >
-              <span class="font-bold text-sm">{{ item.title }} ({{ item.period }})</span>
+              <span class="font-bold text-sm">{{ item.name }} ({{ item.issuer }})</span>
               <button v-if="item.id" type="button" class="text-xs text-red-600 hover:underline" @click="handleDeleteEtc(item.id)">삭제</button>
             </div>
           </div>

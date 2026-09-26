@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import { useAdminCms } from '../src/composables/useAdminCms'
 import CmsModal from '../src/components/admin/CmsModal.vue'
 import App from '../src/App.vue'
+import { Payload } from '../src/payload'
 
 describe('Admin CMS Dashboard & 8 Domains CUD (Issue #16)', () => {
   beforeEach(() => {
@@ -138,23 +139,63 @@ describe('Admin CMS Dashboard & 8 Domains CUD (Issue #16)', () => {
       expect(mockDeleteEq).toHaveBeenCalledWith('id', 42)
       expect(refetchMock).toHaveBeenCalledTimes(2)
     })
+
+    it('정본 스키마 일치: education 및 etc 테이블의 실제 컬럼(institution, course, name, issuer)으로 CUD가 호출되어야 한다', async () => {
+      const refetchMock = vi.fn().mockResolvedValue(undefined)
+      const mockEduUpsert = vi.fn().mockResolvedValue({ data: null, error: null })
+      const mockEtcUpsert = vi.fn().mockResolvedValue({ data: null, error: null })
+
+      const mockClient = {
+        from: vi.fn().mockImplementation((table: string) => {
+          if (table === 'education') return { upsert: mockEduUpsert }
+          if (table === 'etc') return { upsert: mockEtcUpsert }
+          return {}
+        })
+      } as any
+
+      const { saveEducation, saveEtc } = useAdminCms({
+        client: mockClient,
+        onSuccess: refetchMock
+      })
+
+      // education
+      const eduRes = await saveEducation({
+        institution: '서울대학교',
+        course: '컴퓨터공학과 학사',
+        period: '2016.03 - 2020.02'
+      })
+      expect(eduRes.success).toBe(true)
+      expect(mockEduUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          institution: '서울대학교',
+          course: '컴퓨터공학과 학사',
+          period: '2016.03 - 2020.02'
+        })
+      )
+
+      // etc
+      const etcRes = await saveEtc({
+        name: '정보처리기사',
+        issuer: '한국산업인력공단',
+        date: '2021.06'
+      })
+      expect(etcRes.success).toBe(true)
+      expect(mockEtcUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: '정보처리기사',
+          issuer: '한국산업인력공단',
+          date: '2021.06'
+        })
+      )
+    })
   })
 
   describe('CmsModal Component', () => {
-    it('isOpen이 true일 때 8대 도메인 탭과 편집 영역이 렌더링되어야 한다', () => {
+    it('실제 PayloadType 정본 구조를 주입했을 때 8대 도메인 탭 및 기존 목록이 정상 렌더링되어야 한다', () => {
       const wrapper = mount(CmsModal, {
         props: {
           isOpen: true,
-          initialData: {
-            profile: { name: '테스트', position: '엔지니어', email: 't@t.com', phone: '010', github: 'gh', location: 'loc' },
-            introduce: { contents: ['소개 1'] },
-            skill: { categories: [] },
-            experience: [],
-            project: [],
-            education: [],
-            etc: [],
-            footer: { github: 'https://github.com/initbtn', sign: 'Minhyeok Jung', since: 2024 }
-          } as any
+          initialData: Payload // 실제 앱의 정본 페이로드 주입 (list, categories 구조 검증)
         }
       })
 
@@ -167,13 +208,17 @@ describe('Admin CMS Dashboard & 8 Domains CUD (Issue #16)', () => {
       expect(wrapper.text()).toContain('학력')
       expect(wrapper.text()).toContain('기타')
       expect(wrapper.text()).toContain('푸터')
+
+      // 실제 정본 데이터가 input 폼에 바인딩되었는지 확인
+      const nameInput = wrapper.find('input[type="text"]')
+      expect((nameInput.element as HTMLInputElement).value).toBe(Payload.profile.name)
     })
 
     it('닫기 버튼 클릭 시 close 이벤트가 emit되어야 한다', async () => {
       const wrapper = mount(CmsModal, {
         props: {
           isOpen: true,
-          initialData: {} as any
+          initialData: Payload
         }
       })
 
