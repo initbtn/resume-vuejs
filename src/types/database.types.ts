@@ -12,9 +12,285 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  public: {
+  graphql_public: {
     Tables: {
       [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  public: {
+    Tables: {
+      education: {
+        Row: {
+          course: string
+          created_at: string
+          id: number
+          institution: string
+          order_index: number
+          period: string
+          updated_at: string
+        }
+        Insert: {
+          course: string
+          created_at?: string
+          id?: never
+          institution: string
+          order_index?: number
+          period: string
+          updated_at?: string
+        }
+        Update: {
+          course?: string
+          created_at?: string
+          id?: never
+          institution?: string
+          order_index?: number
+          period?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      etc: {
+        Row: {
+          created_at: string
+          date: string
+          id: number
+          issuer: string
+          name: string
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: never
+          issuer: string
+          name: string
+          order_index?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: never
+          issuer?: string
+          name?: string
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      experience: {
+        Row: {
+          company: string
+          created_at: string
+          description: string | null
+          id: number
+          order_index: number
+          period: string
+          position: string
+          projects: Json
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          description?: string | null
+          id?: never
+          order_index?: number
+          period: string
+          position: string
+          projects?: Json
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          description?: string | null
+          id?: never
+          order_index?: number
+          period?: string
+          position?: string
+          projects?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      footer: {
+        Row: {
+          created_at: string
+          github: string
+          id: string
+          originalRepo: string | null
+          sign: string
+          since: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          github: string
+          id?: string
+          originalRepo?: string | null
+          sign: string
+          since?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          github?: string
+          id?: string
+          originalRepo?: string | null
+          sign?: string
+          since?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      introduce: {
+        Row: {
+          contents: string[]
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          contents?: string[]
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          contents?: string[]
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profile: {
+        Row: {
+          created_at: string
+          email: string
+          github: string
+          id: string
+          location: string
+          name: string
+          phone: string
+          position: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          github: string
+          id?: string
+          location: string
+          name: string
+          phone: string
+          position: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          github?: string
+          id?: string
+          location?: string
+          name?: string
+          phone?: string
+          position?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      project: {
+        Row: {
+          achievements: string[]
+          created_at: string
+          description: string | null
+          id: number
+          link: string | null
+          order_index: number
+          period: string
+          skills: string[]
+          title: string
+          updated_at: string
+          where: string | null
+        }
+        Insert: {
+          achievements?: string[]
+          created_at?: string
+          description?: string | null
+          id?: never
+          link?: string | null
+          order_index?: number
+          period: string
+          skills?: string[]
+          title: string
+          updated_at?: string
+          where?: string | null
+        }
+        Update: {
+          achievements?: string[]
+          created_at?: string
+          description?: string | null
+          id?: never
+          link?: string | null
+          order_index?: number
+          period?: string
+          skills?: string[]
+          title?: string
+          updated_at?: string
+          where?: string | null
+        }
+        Relationships: []
+      }
+      skill: {
+        Row: {
+          category: string
+          created_at: string
+          id: number
+          items: string[]
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: never
+          items?: string[]
+          order_index?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: never
+          items?: string[]
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -149,6 +425,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
