@@ -3,9 +3,14 @@ import type { Database } from '../types/database.types'
 
 export type TypedSupabaseClient = SupabaseClient<Database>
 
+export interface CreateSupabaseClientOptions {
+  persistSession?: boolean
+}
+
 export function createSupabaseClient(
   url?: string,
-  anonKey?: string
+  anonKey?: string,
+  options?: CreateSupabaseClientOptions
 ): TypedSupabaseClient | null {
   const supabaseUrl =
     url !== undefined ? url : (import.meta.env?.VITE_SUPABASE_URL as string | undefined)
@@ -18,9 +23,12 @@ export function createSupabaseClient(
     return null
   }
 
+  const persistSession = options?.persistSession ?? (typeof window !== 'undefined')
+
   return createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
-      persistSession: false
+      persistSession,
+      autoRefreshToken: persistSession
     }
   })
 }
