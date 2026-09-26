@@ -47,6 +47,59 @@ case "${1:-}" in
     echo "Successfully applied seed data."
     exit 0
     ;;
+  network-allow-ip)
+    IP="${2:-}"
+    if [ -z "${IP}" ]; then
+      echo "Detecting public IP address..."
+      IP="$(curl -s --connect-timeout 5 https://api.ipify.org || curl -s --connect-timeout 5 https://ifconfig.me || true)"
+    fi
+    if [ -z "${IP}" ]; then
+      echo "Error: Failed to detect public IP address." >&2
+      exit 1
+    fi
+    if [[ "${IP}" != *"/"* ]]; then
+      CIDR="${IP}/32"
+    else
+      CIDR="${IP}"
+    fi
+    echo "Configuring Supabase DB network restrictions for: ${CIDR}..."
+    RESPONSE="$(curl -s -w "\n%{http_code}" -X POST "https://api.supabase.com/v1/projects/${PROJECT_REF}/network-restrictions/apply" \
+      -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+      -H "Content-Type: application/json" \
+      -d "{\"dbAllowedCidrs\":[\"${CIDR}\"],\"dbAllowedCidrsV6\":[]}")"
+    HTTP_CODE="$(echo "${RESPONSE}" | tail -n1)"
+    BODY="$(echo "${RESPONSE}" | head -n -1)"
+    if [ "${HTTP_CODE}" -ge 200 ] && [ "${HTTP_CODE}" -lt 300 ]; then
+      echo "Successfully updated network restrictions: ${CIDR}"
+      echo "${BODY}"
+      exit 0
+    else
+      echo "Error updating network restrictions (HTTP ${HTTP_CODE}): ${BODY}" >&2
+      exit 1
+    fi
+    ;;
+  network-restrictions)
+    shift
+    ARGS=("$@")
+    HAS_PROJECT_REF=false
+    HAS_EXPERIMENTAL=false
+    for arg in "${ARGS[@]}"; do
+      if [[ "${arg}" == "--project-ref"* ]]; then
+        HAS_PROJECT_REF=true
+      fi
+      if [[ "${arg}" == "--experimental"* ]]; then
+        HAS_EXPERIMENTAL=true
+      fi
+    done
+    EXTRA_ARGS=()
+    if [ "${HAS_PROJECT_REF}" = false ]; then
+      EXTRA_ARGS+=(--project-ref "${PROJECT_REF}")
+    fi
+    if [ "${HAS_EXPERIMENTAL}" = false ]; then
+      EXTRA_ARGS+=(--experimental)
+    fi
+    exec npx -y supabase@2.118.0 network-restrictions "${ARGS[@]}" "${EXTRA_ARGS[@]}"
+    ;;
   *)
     exec npx -y supabase@2.118.0 "$@"
     ;;

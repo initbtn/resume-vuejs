@@ -151,5 +151,21 @@ describe('Supabase Client & Composable (Milestone 2 - Issue #4)', () => {
       }
     })
   })
+
+  describe('Supabase Security Hardening - Network Restrictions & CORS (Issue #12)', () => {
+    it('scripts/supabase.sh에 network-allow-ip 및 network-restrictions 서브커맨드가 정의되어 있어야 한다', async () => {
+      const fs = await import('fs')
+      const path = await import('path')
+
+      const scriptFile = path.resolve(__dirname, '../scripts/supabase.sh')
+      expect(fs.existsSync(scriptFile)).toBe(true)
+
+      const scriptContent = fs.readFileSync(scriptFile, 'utf-8')
+      expect(scriptContent).toContain('network-allow-ip)')
+      expect(scriptContent).toContain('network-restrictions)')
+      expect(scriptContent).toContain('dbAllowedCidrs')
+      expect(scriptContent).toContain('network-restrictions/apply')
+    })
+  })
 })
 
