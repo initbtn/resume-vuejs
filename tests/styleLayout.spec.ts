@@ -5,7 +5,7 @@
  * 1. 레이아웃이 2-column(사이드바 + 메인) 구조를 갖는지
  * 2. CommonSection이 구분선 스타일을 포함하는지
  * 3. Skill 배지 형태 렌더링
- * 4. @media print에서 숨길 요소에 print:hidden 클래스가 붙는지
+ * 4. @media print에서 어드민 UI 요소에 display:none이 적용되는지 (CSS @media print 규칙 사용)
  */
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
