@@ -7,6 +7,43 @@ body {
   font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
 }
 
+/* resume.yowu.dev Editorial Grid & Card Styles */
+.resume-container {
+  max-width: 840px;
+  margin: 0 auto;
+}
+
+.card-grid-3 {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media screen and (max-width: 991px) {
+  .card-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .card-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.split-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1.5rem;
+}
+
+@media screen and (max-width: 767px) {
+  .split-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
 /* Print styles */
 @media print {
   /* Hide admin UI and navigation */
@@ -22,9 +59,21 @@ body {
     font-size: 11pt;
   }
 
-  /* Avoid page breaks inside sections */
-  section {
+  .resume-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .card-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  /* Avoid page breaks inside sections and cards */
+  section,
+  .highlight-card,
+  .split-row {
     page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   a {

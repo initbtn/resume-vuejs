@@ -1,11 +1,11 @@
 /**
- * Issue #21: resume.yowu.dev 스타일/레이아웃 적용 — TDD RED
+ * Issue #24: resume.yowu.dev 실측 기반 레이아웃 구조 정정 — TDD RED
  *
  * 검증 대상:
- * 1. 레이아웃이 2-column(사이드바 + 메인) 구조를 갖는지
- * 2. CommonSection이 구분선 스타일을 포함하는지
- * 3. Skill 배지 형태 렌더링
- * 4. @media print에서 어드민 UI 요소에 display:none이 적용되는지 (CSS @media print 규칙 사용)
+ * 1. App 레이아웃이 840px 단일 에디토리얼 컨테이너(resume-container) 구조를 갖는지
+ * 2. Profile 컴포넌트가 상단에서 가로 flex(profile-identity) 구조를 갖는지
+ * 3. CommonSection이 구분선 스타일을 포함하는지
+ * 4. Skill 배지 형태 렌더링
  */
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
@@ -30,14 +30,15 @@ describe('CommonSection — 섹션 헤더 스타일', () => {
   })
 })
 
-describe('App 레이아웃 — 2-column 구조', () => {
-  it('사이드바 영역(data-testid=sidebar)이 존재한다', async () => {
+describe('App 레이아웃 — resume-container 단일 컬럼 구조', () => {
+  it('중앙 정렬된 resume-container(data-testid=resume-container)가 존재한다', async () => {
     const { default: App } = await import('../src/App.vue')
     const wrapper = mount(App, {
       global: {
         stubs: {
           Profile: true,
           Introduce: true,
+          HighlightCards: true,
           Skill: true,
           Experience: true,
           Project: true,
@@ -48,27 +49,23 @@ describe('App 레이아웃 — 2-column 구조', () => {
         },
       },
     })
-    expect(wrapper.find('[data-testid="resume-sidebar"]').exists()).toBe(true)
+    const container = wrapper.find('[data-testid="resume-container"]')
+    expect(container.exists()).toBe(true)
+    // 기존의 좌우 aside 사이드바 분할은 없어야 함
+    expect(wrapper.find('[data-testid="resume-sidebar"]').exists()).toBe(false)
   })
+})
 
-  it('메인 콘텐츠 영역(data-testid=resume-main)이 존재한다', async () => {
-    const { default: App } = await import('../src/App.vue')
-    const wrapper = mount(App, {
-      global: {
-        stubs: {
-          Profile: true,
-          Introduce: true,
-          Skill: true,
-          Experience: true,
-          Project: true,
-          Education: true,
-          Footer: true,
-          LoginModal: true,
-          CmsModal: true,
-        },
-      },
+describe('Profile 컴포넌트 — 상단 가로 flex 레이아웃', () => {
+  it('profile-identity 영역이 존재하고 이미지와 텍스트를 flex로 포함한다', async () => {
+    const { default: Profile } = await import('../src/components/profile/Profile.vue')
+    const wrapper = mount(Profile, {
+      props: { payload: Payload.profile },
     })
-    expect(wrapper.find('[data-testid="resume-main"]').exists()).toBe(true)
+    const identity = wrapper.find('[data-testid="profile-identity"]')
+    expect(identity.exists()).toBe(true)
+    expect(wrapper.find('img').exists()).toBe(true)
+    expect(wrapper.text()).toContain(Payload.profile.name)
   })
 })
 
