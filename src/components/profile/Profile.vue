@@ -8,6 +8,18 @@ defineProps<{
 
 <template>
   <div class="profile-sidebar pt-6 pb-6 md:pb-0 border-b md:border-b-0 border-gray-200">
+    <!-- Profile Photo -->
+    <div class="mb-5">
+      <picture>
+        <source srcset="/profile.webp" type="image/webp" />
+        <img
+          src="/profile-opt.jpg"
+          alt="프로필 사진"
+          class="w-32 h-32 rounded-full object-cover object-top shadow-md"
+        />
+      </picture>
+    </div>
+
     <!-- Name & Position -->
     <div class="mb-6">
       <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 leading-tight">{{ payload.name }}</h1>
