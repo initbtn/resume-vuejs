@@ -11,13 +11,16 @@ withDefaults(defineProps<CommonRowProps>(), {
 <template>
   <div>
     <hr v-if="index > 0" class="my-6 border-gray-200" />
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-6">
-      <!-- Left (col-3, right-aligned on desktop) -->
-      <div class="md:col-span-3 md:text-right">
+    <div
+      class="split-row grid grid-cols-1 md:grid-cols-[200px_1fr] gap-2 md:gap-6"
+      data-testid="split-row"
+    >
+      <!-- Left (200px on desktop, right-aligned) -->
+      <div class="split-left md:text-right">
         <slot name="left" />
       </div>
-      <!-- Right (col-9) -->
-      <div class="md:col-span-9">
+      <!-- Right (1fr on desktop) -->
+      <div class="split-right min-w-0">
         <slot name="right" />
       </div>
     </div>

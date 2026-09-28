@@ -1,5 +1,5 @@
 <script setup lang="ts">
-interface HighlightCard {
+export interface HighlightCard {
   title: string
   description: string
   keywords: string[]

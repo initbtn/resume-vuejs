@@ -134,11 +134,3 @@ const handleSignOut = async () => {
     />
   </div>
 </template>
-
-<style scoped>
-.resume-container {
-  font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  line-height: 1.8;
-  word-break: keep-all;
-}
-</style>

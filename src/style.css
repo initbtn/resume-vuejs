@@ -11,6 +11,8 @@ body {
 .resume-container {
   max-width: 840px;
   margin: 0 auto;
+  line-height: 1.8;
+  word-break: keep-all;
 }
 
 .card-grid-3 {
