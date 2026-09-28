@@ -4,6 +4,7 @@ import { useResumeData } from './composables/useResumeData'
 import { useAuth } from './composables/useAuth'
 import Profile from './components/profile/Profile.vue'
 import Introduce from './components/introduce/Introduce.vue'
+import HighlightCards from './components/highlight/HighlightCards.vue'
 import Skill from './components/skill/Skill.vue'
 import Experience from './components/experience/Experience.vue'
 import Project from './components/project/Project.vue'
@@ -79,23 +80,20 @@ const handleSignOut = async () => {
       </div>
     </header>
 
-    <!-- Main Resume Container -->
+    <!-- Main Resume Container (resume.yowu.dev Editorial Single Container) -->
     <main class="flex-1">
-      <div class="resume-container max-w-5xl mx-auto px-4 py-8 text-gray-800 md:flex md:gap-10">
-        <!-- Sidebar: Profile -->
-        <aside data-testid="resume-sidebar" class="md:w-72 md:flex-shrink-0">
-          <Profile :payload="resumeData.profile" />
-        </aside>
-
-        <!-- Main Content -->
-        <div data-testid="resume-main" class="flex-1 min-w-0">
-          <Introduce :payload="resumeData.introduce" />
-          <Skill :payload="resumeData.skill" />
-          <Experience :payload="resumeData.experience" />
-          <Project :payload="resumeData.project" />
-          <Education :education-payload="resumeData.education" :etc-payload="resumeData.etc" />
-          <Footer :payload="resumeData.footer" />
-        </div>
+      <div
+        class="resume-container max-w-[840px] mx-auto px-4 md:px-8 py-8 text-gray-800"
+        data-testid="resume-container"
+      >
+        <Profile :payload="resumeData.profile" />
+        <Introduce :payload="resumeData.introduce" />
+        <HighlightCards />
+        <Skill :payload="resumeData.skill" />
+        <Experience :payload="resumeData.experience" />
+        <Project :payload="resumeData.project" />
+        <Education :education-payload="resumeData.education" :etc-payload="resumeData.etc" />
+        <Footer :payload="resumeData.footer" />
       </div>
     </main>
 
@@ -136,11 +134,3 @@ const handleSignOut = async () => {
     />
   </div>
 </template>
-
-<style scoped>
-.resume-container {
-  font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  line-height: 1.8;
-  word-break: keep-all;
-}
-</style>
