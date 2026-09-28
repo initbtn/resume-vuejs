@@ -81,15 +81,21 @@ const handleSignOut = async () => {
 
     <!-- Main Resume Container -->
     <main class="flex-1">
-      <div class="resume-container max-w-4xl mx-auto px-4 py-8 text-gray-800">
-        <!-- Component-driven orchestration with Supabase / Fallback pipeline -->
-        <Profile :payload="resumeData.profile" />
-        <Introduce :payload="resumeData.introduce" />
-        <Skill :payload="resumeData.skill" />
-        <Experience :payload="resumeData.experience" />
-        <Project :payload="resumeData.project" />
-        <Education :education-payload="resumeData.education" :etc-payload="resumeData.etc" />
-        <Footer :payload="resumeData.footer" />
+      <div class="resume-container max-w-5xl mx-auto px-4 py-8 text-gray-800 md:flex md:gap-10">
+        <!-- Sidebar: Profile -->
+        <aside data-testid="resume-sidebar" class="md:w-72 md:flex-shrink-0">
+          <Profile :payload="resumeData.profile" />
+        </aside>
+
+        <!-- Main Content -->
+        <div data-testid="resume-main" class="flex-1 min-w-0">
+          <Introduce :payload="resumeData.introduce" />
+          <Skill :payload="resumeData.skill" />
+          <Experience :payload="resumeData.experience" />
+          <Project :payload="resumeData.project" />
+          <Education :education-payload="resumeData.education" :etc-payload="resumeData.etc" />
+          <Footer :payload="resumeData.footer" />
+        </div>
       </div>
     </main>
 

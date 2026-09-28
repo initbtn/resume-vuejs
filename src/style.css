@@ -3,6 +3,32 @@
 @tailwind utilities;
 
 body {
-  @apply bg-gray-50 text-gray-800 antialiased;
+  @apply bg-white text-gray-800 antialiased;
   font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+}
+
+/* Print styles */
+@media print {
+  /* Hide admin UI and navigation */
+  [data-testid="admin-top-bar"],
+  [data-testid="admin-login-button"],
+  [data-testid="open-cms-button"],
+  [data-testid="admin-logout-button"] {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    font-size: 11pt;
+  }
+
+  /* Avoid page breaks inside sections */
+  section {
+    page-break-inside: avoid;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }

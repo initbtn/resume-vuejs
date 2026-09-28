@@ -20,6 +20,7 @@ defineProps<{
             <span
               v-for="(item, iIdx) in cat.items"
               :key="iIdx"
+              data-testid="skill-badge"
               class="text-xs bg-blue-50 text-[#3c78d8] border border-blue-200 px-2.5 py-1 rounded font-medium"
             >
               {{ item }}
