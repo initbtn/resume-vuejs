@@ -5,6 +5,7 @@ import { useAuth } from './composables/useAuth'
 import Profile from './components/profile/Profile.vue'
 import Introduce from './components/introduce/Introduce.vue'
 import HighlightCards from './components/highlight/HighlightCards.vue'
+import Certification from './components/certification/Certification.vue'
 import Skill from './components/skill/Skill.vue'
 import Experience from './components/experience/Experience.vue'
 import Project from './components/project/Project.vue'
@@ -91,33 +92,33 @@ const handleSignOut = async () => {
         <Profile :payload="resumeData.profile" />
         <Introduce :payload="resumeData.introduce" />
         <HighlightCards :cards="resumeData.highlight.list" />
+        <Certification :etc-payload="resumeData.etc" />
         <Skill :payload="resumeData.skill" />
         <Experience :payload="resumeData.experience" />
         <Project :payload="resumeData.project" />
-        <Education :education-payload="resumeData.education" :etc-payload="resumeData.etc" />
+        <Education :education-payload="resumeData.education" />
         <Footer :payload="resumeData.footer" />
       </div>
     </main>
 
-    <!-- PDF 저장 / 인쇄 (A4) -->
-    <div class="fixed bottom-6 left-6 z-30">
+    <!-- Floating Actions (우하단): PDF 출력 버튼이 관리자 진입 버튼 위에 쌓인다 -->
+    <div
+      data-testid="floating-actions"
+      class="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2"
+    >
       <button
         data-testid="print-button"
         type="button"
         class="bg-white hover:bg-gray-100 text-gray-800 text-xs font-semibold px-3 py-2 rounded-full shadow-lg border border-gray-200"
-        title="A4 PDF 저장 / 인쇄"
+        title="A4 PDF 출력"
         @click="printResume"
       >
-        PDF 저장 / 인쇄
+        PDF 출력
       </button>
-    </div>
 
-    <!-- Admin Entry Floating Trigger (When Unauthenticated) -->
-    <div
-      v-if="!isAuthenticated"
-      class="fixed bottom-6 right-6 z-30"
-    >
+      <!-- Admin Entry Trigger (When Unauthenticated) -->
       <button
+        v-if="!isAuthenticated"
         data-testid="admin-login-button"
         type="button"
         class="flex items-center space-x-2 bg-gray-900 hover:bg-black text-white text-xs font-semibold px-3 py-2 rounded-full shadow-lg transition-transform hover:scale-105 opacity-80 hover:opacity-100"
