@@ -40,6 +40,8 @@ const handleLogin = async (credentials: { email: string; password: string }) => 
   }
 }
 
+const printResume = () => window.print()
+
 const handleSignOut = async () => {
   isCmsModalOpen.value = false
   await signOut()
@@ -88,7 +90,7 @@ const handleSignOut = async () => {
       >
         <Profile :payload="resumeData.profile" />
         <Introduce :payload="resumeData.introduce" />
-        <HighlightCards />
+        <HighlightCards :cards="resumeData.highlight.list" />
         <Skill :payload="resumeData.skill" />
         <Experience :payload="resumeData.experience" />
         <Project :payload="resumeData.project" />
@@ -96,6 +98,19 @@ const handleSignOut = async () => {
         <Footer :payload="resumeData.footer" />
       </div>
     </main>
+
+    <!-- PDF 저장 / 인쇄 (A4) -->
+    <div class="fixed bottom-6 left-6 z-30">
+      <button
+        data-testid="print-button"
+        type="button"
+        class="bg-white hover:bg-gray-100 text-gray-800 text-xs font-semibold px-3 py-2 rounded-full shadow-lg border border-gray-200"
+        title="A4 PDF 저장 / 인쇄"
+        @click="printResume"
+      >
+        PDF 저장 / 인쇄
+      </button>
+    </div>
 
     <!-- Admin Entry Floating Trigger (When Unauthenticated) -->
     <div

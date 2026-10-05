@@ -1,5 +1,6 @@
 import { profile } from './profile'
 import { introduce } from './introduce'
+import { highlight } from './highlight'
 import { skill } from './skill'
 import { experience } from './experience'
 import { project } from './project'
@@ -11,6 +12,7 @@ import type { PayloadType } from './types'
 export const Payload: PayloadType = {
   profile,
   introduce,
+  highlight,
   skill,
   experience,
   project,

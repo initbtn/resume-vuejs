@@ -42,6 +42,17 @@ export interface IExperience {
   list: IExperienceItem[]
 }
 
+export interface IHighlightItem {
+  id?: number
+  title: string
+  description: string
+  keywords: string[]
+}
+
+export interface IHighlight {
+  list: IHighlightItem[]
+}
+
 export interface IProjectItem {
   id?: number
   title: string
@@ -89,6 +100,7 @@ export interface IFooter {
 export interface PayloadType {
   profile: IProfile
   introduce: IIntroduce
+  highlight: IHighlight
   skill: ISkill
   experience: IExperience
   project: IProject

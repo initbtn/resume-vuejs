@@ -14,7 +14,7 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const activeTab = ref<'profile' | 'introduce' | 'skill' | 'experience' | 'project' | 'education' | 'etc' | 'footer'>('profile')
+const activeTab = ref<'profile' | 'introduce' | 'highlight' | 'skill' | 'experience' | 'project' | 'education' | 'etc' | 'footer'>('profile')
 const feedbackMessage = ref<{ type: 'success' | 'error'; text: string } | null>(null)
 let feedbackTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -22,6 +22,8 @@ const {
   loading,
   updateProfile,
   updateIntroduce,
+  saveHighlight,
+  deleteHighlight,
   saveSkill,
   deleteSkill,
   saveExperience,
@@ -53,6 +55,7 @@ const profileForm = reactive({
 
 const introduceText = ref('')
 
+const newHighlight = reactive({ title: '', description: '', keywords: '' })
 const newSkill = reactive({ category: '', items: '' })
 const newExp = reactive({ company: '', position: '', period: '', description: '' })
 const newProj = reactive({ title: '', period: '', where: '', description: '' })
@@ -193,6 +196,29 @@ const handleDeleteEducation = async (id: number) => {
   else showFeedback('error', res.error?.message || '학력 삭제 실패')
 }
 
+const handleAddHighlight = async () => {
+  if (!newHighlight.title.trim() || !newHighlight.description.trim()) return
+  const res = await saveHighlight({
+    title: newHighlight.title,
+    description: newHighlight.description,
+    keywords: newHighlight.keywords.split(',')
+  })
+  if (res.success) {
+    showFeedback('success', '핵심 역량 카드가 추가되었습니다.')
+    newHighlight.title = ''
+    newHighlight.description = ''
+    newHighlight.keywords = ''
+  } else {
+    showFeedback('error', res.error?.message || '핵심 역량 카드 추가 실패')
+  }
+}
+
+const handleDeleteHighlight = async (id: number) => {
+  const res = await deleteHighlight(id)
+  if (res.success) showFeedback('success', '핵심 역량 카드가 삭제되었습니다.')
+  else showFeedback('error', res.error?.message || '핵심 역량 카드 삭제 실패')
+}
+
 const handleAddEtc = async () => {
   if (!newEtc.name.trim() || !newEtc.issuer.trim()) return
   const res = await saveEtc(newEtc)
@@ -264,6 +290,7 @@ const handleSaveFooter = async () => {
           v-for="tab in [
             { key: 'profile', label: '프로필' },
             { key: 'introduce', label: '자기소개' },
+            { key: 'highlight', label: '핵심 역량' },
             { key: 'skill', label: '스킬' },
             { key: 'experience', label: '경력' },
             { key: 'project', label: '프로젝트' },
@@ -343,6 +370,29 @@ const handleSaveFooter = async () => {
             >
               {{ loading ? '저장 중...' : '자기소개 저장' }}
             </button>
+          </div>
+        </div>
+
+        <!-- 2-1. Highlight Tab -->
+        <div v-if="activeTab === 'highlight'" class="space-y-4">
+          <h3 class="text-base font-bold text-gray-900 border-b pb-2">핵심 역량 카드 목록</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <input v-model="newHighlight.title" type="text" placeholder="제목" class="px-3 py-2 border rounded-lg text-sm" />
+            <input v-model="newHighlight.description" type="text" placeholder="설명" class="px-3 py-2 border rounded-lg text-sm" />
+            <input v-model="newHighlight.keywords" type="text" placeholder="키워드 (쉼표 구분)" class="px-3 py-2 border rounded-lg text-sm" />
+          </div>
+          <div class="flex justify-end">
+            <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold" @click="handleAddHighlight">카드 추가</button>
+          </div>
+          <div v-if="initialData?.highlight?.list?.length" class="space-y-2 pt-2">
+            <div
+              v-for="(card, idx) in initialData.highlight.list"
+              :key="idx"
+              class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center"
+            >
+              <span class="font-bold text-sm">{{ card.title }}</span>
+              <button v-if="card.id" type="button" class="text-xs text-red-600 hover:underline" @click="handleDeleteHighlight(card.id)">삭제</button>
+            </div>
           </div>
         </div>
 

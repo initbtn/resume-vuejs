@@ -165,6 +165,36 @@ export type Database = {
         }
         Relationships: []
       }
+      highlight: {
+        Row: {
+          created_at: string
+          description: string
+          id: number
+          keywords: string[]
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: never
+          keywords?: string[]
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: never
+          keywords?: string[]
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       introduce: {
         Row: {
           contents: string[]

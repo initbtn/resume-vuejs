@@ -17,6 +17,7 @@ type ProfileInsert = Database['public']['Tables']['profile']['Insert']
 type IntroduceInsert = Database['public']['Tables']['introduce']['Insert']
 type SkillInsert = Database['public']['Tables']['skill']['Insert']
 type ExperienceInsert = Database['public']['Tables']['experience']['Insert']
+type HighlightInsert = Database['public']['Tables']['highlight']['Insert']
 type ProjectInsert = Database['public']['Tables']['project']['Insert']
 type EducationInsert = Database['public']['Tables']['education']['Insert']
 type EtcInsert = Database['public']['Tables']['etc']['Insert']
@@ -370,6 +371,57 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     }
   }
 
+  // Highlight Save / Delete (Columns: title, description, keywords)
+  const saveHighlight = async (item: {
+    id?: number
+    title: string
+    description: string
+    keywords: string[]
+    order_index?: number
+  }): Promise<CmsOperationResult> => {
+    error.value = null
+    if (!item.title.trim() || !item.description.trim()) {
+      return handleError(new Error('핵심 역량 카드의 제목과 설명은 필수 항목입니다.'))
+    }
+    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+
+    try {
+      loading.value = true
+      const row: HighlightInsert = {
+        title: item.title.trim(),
+        description: item.description.trim(),
+        keywords: item.keywords.map((k) => k.trim()).filter(Boolean),
+        order_index: item.order_index ?? 0,
+        updated_at: new Date().toISOString()
+      }
+      if (item.id !== undefined) {
+        row.id = item.id as never
+      }
+
+      const { data, error: dbError } = await client.from('highlight').upsert(row)
+      if (dbError) return handleError(dbError)
+      return await handleSuccess(data)
+    } catch (err) {
+      return handleError(err)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const deleteHighlight = async (id: number): Promise<CmsOperationResult> => {
+    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    try {
+      loading.value = true
+      const { data, error: dbError } = await client.from('highlight').delete().eq('id', id)
+      if (dbError) return handleError(dbError)
+      return await handleSuccess(data)
+    } catch (err) {
+      return handleError(err)
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 8. Footer Update
   const updateFooter = async (payload: {
     github: string
@@ -419,6 +471,8 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     deleteEducation,
     saveEtc,
     deleteEtc,
+    saveHighlight,
+    deleteHighlight,
     updateFooter
   }
 }

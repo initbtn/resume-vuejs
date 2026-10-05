@@ -19,4 +19,12 @@ describe('HighlightCards — 핵심 역량 3단 카드 그리드', () => {
     expect(firstCard.find('.highlight-description').exists()).toBe(true)
     expect(firstCard.findAll('.highlight-keywords span').length).toBeGreaterThan(0)
   })
+
+  it('cards prop 이 주어지면 CMS 데이터로 렌더링한다', () => {
+    const wrapper = mount(HighlightCards, {
+      props: { cards: [{ title: 'X', description: 'Y', keywords: ['k'] }] },
+    })
+    expect(wrapper.findAll('[data-testid="highlight-card"]').length).toBe(1)
+    expect(wrapper.text()).toContain('X')
+  })
 })

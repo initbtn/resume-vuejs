@@ -47,6 +47,11 @@ body {
 }
 
 /* Print styles */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
 @media print {
   /* Hide admin UI and navigation */
   [data-testid="admin-top-bar"],
@@ -54,6 +59,15 @@ body {
   [data-testid="open-cms-button"],
   [data-testid="admin-logout-button"] {
     display: none !important;
+  }
+
+  [data-testid="print-button"] {
+    display: none !important;
+  }
+
+  html,
+  body {
+    width: 210mm;
   }
 
   body {
