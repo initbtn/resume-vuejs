@@ -95,6 +95,13 @@ const TABS = [
   }
 ] as const
 
+// 정상(서로 다른 값) 외에, 이전 CMS 가 만든 같은 값·일부만 같은 값·값 없음
+const ORDER_CASES = [
+  { name: '값이 모두 같은 행', values: [0, 0, 0] as (number | undefined)[] },
+  { name: '일부만 같은 행', values: [1, 2, 2] as (number | undefined)[] },
+  { name: '값이 없는 행', values: [undefined, undefined, undefined] as (number | undefined)[] }
+]
+
 const buildData = (tab: (typeof TABS)[number]) => {
   const data: any = JSON.parse(JSON.stringify(Payload))
   const items = JSON.parse(JSON.stringify(tab.items))
@@ -178,20 +185,38 @@ describe('CMS 목록형 탭 수정·순서 변경 (Issue #32)', () => {
       expect((api as any)[tab.save]).not.toHaveBeenCalled()
     })
 
-    it('순서: order_index 가 같은 두 행(이전 CMS 추가분)도 위치 기준으로 서로 다른 값을 받는다', async () => {
-      const data = buildData(tab) as any
-      const list = tab.key === 'skill' ? data.skill.categories : tab.key === 'etc' ? data.etc.certifications : data[tab.key].list
-      list.forEach((row: any) => { row.order_index = 0 })
-      const wrapper = mount(CmsModal, { props: { isOpen: true, initialData: data } })
-      await wrapper.findAll('button').find((b) => b.text() === tab.label)!.trigger('click')
-      await wrapper.find('[data-testid="cms-down-0"]').trigger('click')
-      await vi.waitFor(() => expect((api as any)[tab.save]).toHaveBeenCalledTimes(2))
+    // 이전 CMS 추가분은 order_index 가 모두 0 이다. 옮기지 않은 행까지 포함해 조회 순서가 의도대로여야 한다.
+    it.each(ORDER_CASES)('순서: $name — 이동 후 목록 전체 순서가 의도대로이고 옮기지 않은 행이 튀지 않는다', async ({ values }) => {
+      const open = async () => {
+        const data = buildData(tab) as any
+        const list = tab.key === 'skill' ? data.skill.categories : tab.key === 'etc' ? data.etc.certifications : data[tab.key].list
+        list.forEach((row: any, i: number) => { row.order_index = values[i] })
+        const wrapper = mount(CmsModal, { props: { isOpen: true, initialData: data } })
+        await wrapper.findAll('button').find((b) => b.text() === tab.label)!.trigger('click')
+        return wrapper
+      }
+      const saved = () => (api as any)[tab.save].mock.calls.map((c: any[]) => c[0])
+      // 저장 결과를 원래 값 위에 덮어 조회(order_index 오름차순, 동점은 원래 위치) 순서를 재현한다
+      const resultingIds = () => {
+        const current = new Map<number, number>([[11, values[0] ?? -1], [12, values[1] ?? -1], [13, values[2] ?? -1]])
+        saved().forEach((row: any) => current.set(row.id, row.order_index))
+        // 동점이면 DB 조회 순서가 보장되지 않으므로 최종 값은 모두 달라야 한다
+        expect(new Set(current.values()).size).toBe(3)
+        return [11, 12, 13].sort((x, y) => current.get(x)! - current.get(y)! || x - y)
+      }
 
-      const calls = (api as any)[tab.save].mock.calls.map((c: any[]) => c[0])
-      const first = calls.find((c: any) => c.id === 11)
-      const second = calls.find((c: any) => c.id === 12)
-      expect(first.order_index).toBe(2)
-      expect(second.order_index).toBe(1)
+      let wrapper = await open()
+      await wrapper.find('[data-testid="cms-down-0"]').trigger('click')
+      await vi.waitFor(() => expect(saved().length).toBeGreaterThan(0))
+      await vi.waitFor(() => expect(wrapper.find('[data-testid="cms-down-0"]').attributes('disabled')).toBeUndefined())
+      expect(resultingIds()).toEqual([12, 11, 13])
+
+      ;(api as any)[tab.save].mockClear()
+      wrapper = await open()
+      await wrapper.find('[data-testid="cms-up-2"]').trigger('click')
+      await vi.waitFor(() => expect(saved().length).toBeGreaterThan(0))
+      await vi.waitFor(() => expect(wrapper.find('[data-testid="cms-up-2"]').attributes('disabled')).toBeUndefined())
+      expect(resultingIds()).toEqual([11, 13, 12])
     })
 
     it('추가: 새 행의 order_index 는 현재 목록 최대값 + 1 이다', async () => {

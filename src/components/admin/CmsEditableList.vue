@@ -67,21 +67,36 @@ const saveEdit = async (item: Row) => {
   }
 }
 
-// 인접 두 행의 order_index 를 맞바꾼다. 값이 없거나 같으면(이전 CMS 추가분은 모두 0) 위치 기준으로 매긴다.
+// 목록 전체가 서로 다른 order_index 로 정렬돼 있으면 인접 두 행의 값을 맞바꾼다.
+// 값이 없거나 같은 행이 있으면(이전 CMS 추가분은 모두 0) 옮기지 않은 행이 튀지 않도록 목록 전체를 위치 기준(1..n)으로 다시 매긴다.
+const planMove = (rows: Row[], idx: number, j: number): Row[] => {
+  const strictlyOrdered = rows.every(
+    (r, i) => typeof r.order_index === 'number' && (i === 0 || r.order_index > rows[i - 1].order_index)
+  )
+  if (strictlyOrdered) {
+    return [
+      { ...rows[idx], order_index: rows[j].order_index },
+      { ...rows[j], order_index: rows[idx].order_index }
+    ]
+  }
+  const moved = rows.slice()
+  moved[idx] = rows[j]
+  moved[j] = rows[idx]
+  return moved
+    .map((r, pos): Row => ({ ...r, order_index: pos + 1 }))
+    .filter((r) => r.order_index !== rows.find((o) => o.id === r.id)?.order_index)
+}
+
 const move = async (idx: number, dir: -1 | 1) => {
   const j = idx + dir
   if (j < 0 || j >= props.items.length) return
-  const a = props.items[idx]
-  const b = props.items[j]
-  const swappable = typeof a.order_index === 'number' && typeof b.order_index === 'number' && a.order_index !== b.order_index
-  const aOrder = swappable ? b.order_index : j + 1
-  const bOrder = swappable ? a.order_index : idx + 1
+  const plan = planMove(props.items, idx, j)
   busy.value = true
   try {
-    const first = await props.save({ ...a, order_index: aOrder })
-    if (!first.success) return fail(first, '순서 변경 실패')
-    const second = await props.save({ ...b, order_index: bOrder })
-    if (!second.success) return fail(second, '순서 변경 실패(일부만 반영됨)')
+    for (const [n, row] of plan.entries()) {
+      const res = await props.save(row)
+      if (!res.success) return fail(res, n === 0 ? '순서 변경 실패' : '순서 변경 실패(일부만 반영됨)')
+    }
     emit('feedback', 'success', '순서가 변경되었습니다.')
   } finally {
     busy.value = false
