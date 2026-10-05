@@ -16,16 +16,17 @@ export const project: IProject = {
       link: "https://github.com/initbtn/resume-vuejs"
     },
     {
-      title: "해양 친환경 설비 실시간 센서 모니터링 및 GIS 관제 웹 플랫폼",
-      period: "2026.09 ~ (주제선정 및 기획)",
-      where: "친환경 스마트 선박 관제 솔루션 (기획/사전조사)",
-      description: "IMO 환경 규제 대응 탈황 설비(Scrubber) 및 선박 평형수처리(BWTS) 실시간 센서 관제 대시보드 (주제 선정 및 아키텍처 기획 단계)",
+      title: "2026 부산교구 젊은이의 날(BYD) 순례자 참여형 웹 앱 (busan-youth-day)",
+      period: "2026.09 ~ 2026.10",
+      where: "천주교 부산교구 젊은이의 날 (개인 개발)",
+      description: "행사 일정·스포원파크 지도·스탬프투어·소통피드를 제공하는 Next.js 14 기반 모바일 PWA 웹 앱 (Vercel 배포)",
       achievements: [
-        "IMO 환경 규제 대응 선박 배기가스 탈황 및 평형수 설비의 실시간 센서 관제 도메인 요구사항 조사 및 주제 선정",
-        "해양 GIS 지도 라이브러리(Leaflet/OpenLayers) 기반 전 세계 선박 항적 시각화 및 ECharts 시계열 차트 기술 스택 검토",
-        "초 단위 텔레메트리 센서 데이터 처리를 위한 WebSocket 기반 실시간 스트리밍 파이프라인 및 경보 인디케이터 구조 설계 기획"
+        "카카오 SSO 인증과 온보딩 순례 공동체(수호성인 모둠) 무작위 배정 및 Supabase 연동 구현",
+        "소통피드 이미지·숏츠 영상 클라이언트 압축 및 HEIC→WebP 변환 후 Cloudflare R2 업로드 파이프라인 구축",
+        "스포원파크 4대 테마존 인터랙티브 지도, A/B/C 구역별 통합 시간표, QR 스캔 스탬프투어 구현"
       ],
-      skills: ["Vue.js 3", "Leaflet GIS", "ECharts", "WebSocket", "TimeSeries Data", "System Design"]
+      skills: ["Next.js 14", "React 18", "TypeScript", "TailwindCSS", "Supabase", "Cloudflare R2", "Kakao SSO", "Playwright", "Vercel"],
+      link: "https://github.com/initbtn/busan-youth-day"
     }
   ]
 };

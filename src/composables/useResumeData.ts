@@ -23,6 +23,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
   const initialData: PayloadType = {
     profile: { ...Payload.profile },
     introduce: { ...Payload.introduce },
+    highlight: { ...Payload.highlight },
     skill: { ...Payload.skill },
     experience: { ...Payload.experience },
     project: { ...Payload.project },
@@ -58,6 +59,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
       const [
         profileRes,
         introduceRes,
+        highlightRes,
         skillRes,
         experienceRes,
         projectRes,
@@ -67,6 +69,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
       ] = await Promise.all([
         queryTable('profile', true),
         queryTable('introduce', true),
+        queryTable('highlight', false),
         queryTable('skill', false),
         queryTable('experience', false),
         queryTable('project', false),
@@ -79,6 +82,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
       const anyError = [
         profileRes?.error,
         introduceRes?.error,
+        highlightRes?.error,
         skillRes?.error,
         experienceRes?.error,
         projectRes?.error,
@@ -106,6 +110,18 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
       if (introduceRes?.data?.contents && introduceRes.data.contents.length > 0) {
         data.value.introduce = {
           contents: introduceRes.data.contents
+        }
+        hasRemoteData = true
+      }
+
+      if (highlightRes?.data && highlightRes.data.length > 0) {
+        data.value.highlight = {
+          list: highlightRes.data.map((row: any) => ({
+            id: row.id,
+            title: row.title,
+            description: row.description,
+            keywords: row.keywords || []
+          }))
         }
         hasRemoteData = true
       }
