@@ -4,19 +4,19 @@ export const skill: ISkill = {
   categories: [
     {
       category: "Front-end",
-      items: ["Vue.js 3", "React.js", "JavaScript (ES6+)", "HTML5/CSS3", "TailwindCSS", "Axios", "Chart.js / ECharts"]
+      items: ["React.js", "JavaScript (ES6+)", "HTML5/CSS3", "TailwindCSS"]
     },
     {
-      category: "Back-end & Cloud",
-      items: ["Node.js", "Express", "RESTful API", "AWS", "Akamai Linode", "Docker", "Nginx"]
+      category: "Back-end",
+      items: ["Node.js", "Express", "NestJS", "Docker", "Nginx", "MySQL", "Sequelize ORM"]
     },
     {
-      category: "Database & DevOps",
-      items: ["MySQL", "Sequelize ORM", "Terraform", "Ansible", "Git / GitHub", "Loki / Promtail"]
+      category: "Infra",
+      items: ["AWS", "Akamai Linode", "Terraform", "Ansible", "Makefile", "Cloudflare"]
     },
     {
       category: "Domain Knowledge",
-      items: ["조선·해양 도메인 (선박 배관 및 P&ID 이해)", "결제/인증/보험 Open API 연동", "제로트러스트 보안 체계"]
+      items: ["결제/인증/보험 Open API 연동", "조선해양 도메인", "가스일반제조시설 안전관리(업무용대형연소기 제조시설 안전관리)"]
     }
   ]
 };

@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { Payload } from '../src/payload/index'
 import type { PayloadType } from '../src/payload/types'
 
@@ -58,6 +60,46 @@ describe('Payload Domain Integrity & 5 Key KPIs', () => {
     expect(byd).toBeDefined()
     expect(byd?.period).toContain('2026.09')
     expect(byd?.link).toBe('https://github.com/initbtn/busan-youth-day')
+  })
+
+  const EXPECTED_SKILL = [
+    { category: 'Front-end', items: ['React.js', 'JavaScript (ES6+)', 'HTML5/CSS3', 'TailwindCSS'] },
+    { category: 'Back-end', items: ['Node.js', 'Express', 'NestJS', 'Docker', 'Nginx', 'MySQL', 'Sequelize ORM'] },
+    { category: 'Infra', items: ['AWS', 'Akamai Linode', 'Terraform', 'Ansible', 'Makefile', 'Cloudflare'] },
+    {
+      category: 'Domain Knowledge',
+      items: [
+        '결제/인증/보험 Open API 연동',
+        '조선해양 도메인',
+        '가스일반제조시설 안전관리(업무용대형연소기 제조시설 안전관리)'
+      ]
+    }
+  ]
+
+  it('should expose the 4 skill categories in order with exact items (Issue #31)', () => {
+    expect(
+      Payload.skill.categories.map((c) => ({ category: c.category, items: c.items }))
+    ).toEqual(EXPECTED_SKILL)
+  })
+
+  it('should not keep removed template/legacy skill items or old category names (Issue #31)', () => {
+    const names = Payload.skill.categories.map((c) => c.category)
+    const items = Payload.skill.categories.flatMap((c) => c.items)
+    for (const removed of ['Vue.js 3', 'Axios', 'Chart.js / ECharts', 'RESTful API', 'Git / GitHub', 'Loki / Promtail', '제로트러스트 보안 체계']) {
+      expect(items).not.toContain(removed)
+    }
+    expect(names).not.toContain('Back-end & Cloud')
+    expect(names).not.toContain('Database & DevOps')
+  })
+
+  it('should keep supabase/seed.sql skill rows identical to the payload skill (Issue #31)', () => {
+    const seed = readFileSync(resolve(__dirname, '../supabase/seed.sql'), 'utf8')
+    const block = seed.slice(seed.indexOf('INSERT INTO public.skill'), seed.indexOf('-- 4. Experience'))
+    EXPECTED_SKILL.forEach((c, i) => {
+      const row = `('${c.category}', ARRAY[${c.items.map((x) => `'${x}'`).join(', ')}], ${i + 1})`
+      expect(block).toContain(row)
+    })
+    expect((block.match(/^\('/gm) ?? []).length).toBe(EXPECTED_SKILL.length)
   })
 
   it('should expose highlight cards payload', () => {
