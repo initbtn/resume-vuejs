@@ -141,7 +141,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         updated_at: new Date().toISOString()
       }
       if (category.id !== undefined) {
-        row.id = category.id as never
+        row.id = category.id
       }
 
       const { data, error: dbError } = await client.from('skill').upsert(row)
@@ -196,7 +196,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         updated_at: new Date().toISOString()
       }
       if (exp.id !== undefined) {
-        row.id = exp.id as never
+        row.id = exp.id
       }
 
       const { data, error: dbError } = await client.from('experience').upsert(row)
@@ -255,7 +255,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         updated_at: new Date().toISOString()
       }
       if (proj.id !== undefined) {
-        row.id = proj.id as never
+        row.id = proj.id
       }
 
       const { data, error: dbError } = await client.from('project').upsert(row)
@@ -306,7 +306,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         updated_at: new Date().toISOString()
       }
       if (edu.id !== undefined) {
-        row.id = edu.id as never
+        row.id = edu.id
       }
 
       const { data, error: dbError } = await client.from('education').upsert(row)
@@ -357,7 +357,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         updated_at: new Date().toISOString()
       }
       if (item.id !== undefined) {
-        row.id = item.id as never
+        row.id = item.id
       }
 
       const { data, error: dbError } = await client.from('etc').upsert(row)
@@ -408,7 +408,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         updated_at: new Date().toISOString()
       }
       if (item.id !== undefined) {
-        row.id = item.id as never
+        row.id = item.id
       }
 
       const { data, error: dbError } = await client.from('highlight').upsert(row)
