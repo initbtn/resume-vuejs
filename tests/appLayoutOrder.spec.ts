@@ -59,9 +59,9 @@ describe('App — PDF 출력 버튼 문구·위치와 섹션 순서 (Issue #36)'
     expect(box.find('[data-testid="print-button"]').exists()).toBe(true)
   })
 
-  it('섹션 렌더 순서는 INTRODUCE → CERTIFICATION → SKILL → EXPERIENCE → PROJECT → EDUCATION 이다', () => {
+  it('섹션 렌더 순서는 INTRODUCE → EXPERIENCE → PROJECT → CERTIFICATION → EDUCATION → SKILL 이다 (Issue #38)', () => {
     const wrapper = mount(App)
     const titles = wrapper.findAll('section h2').map((h) => h.text())
-    expect(titles).toEqual(['INTRODUCE', 'CERTIFICATION', 'SKILL', 'EXPERIENCE', 'PROJECT', 'EDUCATION'])
+    expect(titles).toEqual(['INTRODUCE', 'EXPERIENCE', 'PROJECT', 'CERTIFICATION', 'EDUCATION', 'SKILL'])
   })
 })
