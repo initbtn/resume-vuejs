@@ -20,6 +20,8 @@ const props = defineProps<{
   summary: (item: Row) => string
   // 탭마다 저장 함수의 인자 타입이 달라 any 로 받는다(행은 기존 행 + 수정 필드)
   save: (row: any) => Promise<SaveResult>
+  // 순서 이동: 바뀌는 행들을 한 번의 요청으로 저장한다(일부만 반영되지 않도록)
+  reorder: (rows: Row[]) => Promise<SaveResult>
   remove: (id: number) => Promise<SaveResult>
 }>()
 
@@ -93,10 +95,8 @@ const move = async (idx: number, dir: -1 | 1) => {
   const plan = planMove(props.items, idx, j)
   busy.value = true
   try {
-    for (const [n, row] of plan.entries()) {
-      const res = await props.save(row)
-      if (!res.success) return fail(res, n === 0 ? '순서 변경 실패' : '순서 변경 실패(일부만 반영됨)')
-    }
+    const res = await props.reorder(plan)
+    if (!res.success) return fail(res, '순서 변경 실패')
     emit('feedback', 'success', '순서가 변경되었습니다.')
   } finally {
     busy.value = false
