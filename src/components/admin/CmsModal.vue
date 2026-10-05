@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, reactive } from 'vue'
 import { useAdminCms } from '../../composables/useAdminCms'
+import CmsEditableList from './CmsEditableList.vue'
 import type { PayloadType } from '../../payload/types'
 
 interface Props {
@@ -94,6 +95,73 @@ watch(
   { immediate: true, deep: true }
 )
 
+// 새 행은 현재 목록 맨 뒤에 놓는다(order_index 최대값 + 1)
+const nextOrder = (list?: Array<{ order_index?: number }>) =>
+  (list ?? []).reduce((max, row) => Math.max(max, row.order_index ?? 0), 0) + 1
+
+// 목록형 탭 6개의 수정 폼 필드(추가 폼과 같은 필드)·요약·저장/삭제 함수
+const listTabs = {
+  highlight: {
+    fields: [
+      { key: 'title', label: '제목' },
+      { key: 'description', label: '설명' },
+      { key: 'keywords', label: '키워드', list: true }
+    ],
+    summary: (i: Record<string, any>) => i.title,
+    save: saveHighlight,
+    remove: deleteHighlight
+  },
+  skill: {
+    fields: [
+      { key: 'category', label: '카테고리명' },
+      { key: 'items', label: '항목들', list: true }
+    ],
+    summary: (i: Record<string, any>) => `${i.category} (${(i.items ?? []).join(', ')})`,
+    save: saveSkill,
+    remove: deleteSkill
+  },
+  experience: {
+    fields: [
+      { key: 'company', label: '회사명' },
+      { key: 'position', label: '직무' },
+      { key: 'period', label: '기간' }
+    ],
+    summary: (i: Record<string, any>) => `${i.company} - ${i.position} ${i.period}`,
+    save: saveExperience,
+    remove: deleteExperience
+  },
+  project: {
+    fields: [
+      { key: 'title', label: '프로젝트명' },
+      { key: 'period', label: '기간' },
+      { key: 'where', label: '소속/기관' }
+    ],
+    summary: (i: Record<string, any>) => `${i.title} ${i.period}`,
+    save: saveProject,
+    remove: deleteProject
+  },
+  education: {
+    fields: [
+      { key: 'institution', label: '기관/대학명' },
+      { key: 'course', label: '과정/전공' },
+      { key: 'period', label: '기간' }
+    ],
+    summary: (i: Record<string, any>) => `${i.institution} (${i.course})`,
+    save: saveEducation,
+    remove: deleteEducation
+  },
+  etc: {
+    fields: [
+      { key: 'name', label: '자격증/활동명' },
+      { key: 'issuer', label: '발급처' },
+      { key: 'date', label: '취득일' }
+    ],
+    summary: (i: Record<string, any>) => `${i.name} (${i.issuer})`,
+    save: saveEtc,
+    remove: deleteEtc
+  }
+}
+
 const showFeedback = (type: 'success' | 'error', text: string) => {
   if (feedbackTimer) {
     clearTimeout(feedbackTimer)
@@ -121,7 +189,7 @@ const handleSaveIntroduce = async () => {
 const handleAddSkill = async () => {
   if (!newSkill.category.trim()) return
   const items = newSkill.items.split(',').map(s => s.trim()).filter(Boolean)
-  const res = await saveSkill({ category: newSkill.category, items })
+  const res = await saveSkill({ category: newSkill.category, items, order_index: nextOrder(props.initialData?.skill?.categories) })
   if (res.success) {
     showFeedback('success', '스킬 카테고리가 추가되었습니다.')
     newSkill.category = ''
@@ -131,15 +199,9 @@ const handleAddSkill = async () => {
   }
 }
 
-const handleDeleteSkill = async (id: number) => {
-  const res = await deleteSkill(id)
-  if (res.success) showFeedback('success', '스킬 항목이 삭제되었습니다.')
-  else showFeedback('error', res.error?.message || '스킬 삭제 실패')
-}
-
 const handleAddExperience = async () => {
   if (!newExp.company.trim() || !newExp.position.trim()) return
-  const res = await saveExperience(newExp)
+  const res = await saveExperience({ ...newExp, order_index: nextOrder(props.initialData?.experience?.list) })
   if (res.success) {
     showFeedback('success', '경력 사항이 추가되었습니다.')
     newExp.company = ''
@@ -151,15 +213,9 @@ const handleAddExperience = async () => {
   }
 }
 
-const handleDeleteExperience = async (id: number) => {
-  const res = await deleteExperience(id)
-  if (res.success) showFeedback('success', '경력 사항이 삭제되었습니다.')
-  else showFeedback('error', res.error?.message || '경력 삭제 실패')
-}
-
 const handleAddProject = async () => {
   if (!newProj.title.trim()) return
-  const res = await saveProject(newProj)
+  const res = await saveProject({ ...newProj, order_index: nextOrder(props.initialData?.project?.list) })
   if (res.success) {
     showFeedback('success', '프로젝트가 추가되었습니다.')
     newProj.title = ''
@@ -171,15 +227,9 @@ const handleAddProject = async () => {
   }
 }
 
-const handleDeleteProject = async (id: number) => {
-  const res = await deleteProject(id)
-  if (res.success) showFeedback('success', '프로젝트가 삭제되었습니다.')
-  else showFeedback('error', res.error?.message || '프로젝트 삭제 실패')
-}
-
 const handleAddEducation = async () => {
   if (!newEdu.institution.trim() || !newEdu.course.trim()) return
-  const res = await saveEducation(newEdu)
+  const res = await saveEducation({ ...newEdu, order_index: nextOrder(props.initialData?.education?.list) })
   if (res.success) {
     showFeedback('success', '학력 사항이 추가되었습니다.')
     newEdu.institution = ''
@@ -190,18 +240,13 @@ const handleAddEducation = async () => {
   }
 }
 
-const handleDeleteEducation = async (id: number) => {
-  const res = await deleteEducation(id)
-  if (res.success) showFeedback('success', '학력 사항이 삭제되었습니다.')
-  else showFeedback('error', res.error?.message || '학력 삭제 실패')
-}
-
 const handleAddHighlight = async () => {
   if (!newHighlight.title.trim() || !newHighlight.description.trim()) return
   const res = await saveHighlight({
     title: newHighlight.title,
     description: newHighlight.description,
-    keywords: newHighlight.keywords.split(',')
+    keywords: newHighlight.keywords.split(','),
+    order_index: nextOrder(props.initialData?.highlight?.list)
   })
   if (res.success) {
     showFeedback('success', '핵심 역량 카드가 추가되었습니다.')
@@ -213,15 +258,9 @@ const handleAddHighlight = async () => {
   }
 }
 
-const handleDeleteHighlight = async (id: number) => {
-  const res = await deleteHighlight(id)
-  if (res.success) showFeedback('success', '핵심 역량 카드가 삭제되었습니다.')
-  else showFeedback('error', res.error?.message || '핵심 역량 카드 삭제 실패')
-}
-
 const handleAddEtc = async () => {
   if (!newEtc.name.trim() || !newEtc.issuer.trim()) return
-  const res = await saveEtc(newEtc)
+  const res = await saveEtc({ ...newEtc, order_index: nextOrder(props.initialData?.etc?.certifications) })
   if (res.success) {
     showFeedback('success', '기타/자격증 항목이 추가되었습니다.')
     newEtc.name = ''
@@ -230,12 +269,6 @@ const handleAddEtc = async () => {
   } else {
     showFeedback('error', res.error?.message || '기타 추가 실패')
   }
-}
-
-const handleDeleteEtc = async (id: number) => {
-  const res = await deleteEtc(id)
-  if (res.success) showFeedback('success', '기타 항목이 삭제되었습니다.')
-  else showFeedback('error', res.error?.message || '기타 삭제 실패')
 }
 
 const handleSaveFooter = async () => {
@@ -384,16 +417,7 @@ const handleSaveFooter = async () => {
           <div class="flex justify-end">
             <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold" @click="handleAddHighlight">카드 추가</button>
           </div>
-          <div v-if="initialData?.highlight?.list?.length" class="space-y-2 pt-2">
-            <div
-              v-for="(card, idx) in initialData.highlight.list"
-              :key="idx"
-              class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center"
-            >
-              <span class="font-bold text-sm">{{ card.title }}</span>
-              <button v-if="card.id" type="button" class="text-xs text-red-600 hover:underline" @click="handleDeleteHighlight(card.id)">삭제</button>
-            </div>
-          </div>
+          <CmsEditableList :items="initialData?.highlight?.list ?? []" v-bind="listTabs.highlight" @feedback="showFeedback" />
         </div>
 
         <!-- 3. Skill Tab -->
@@ -404,19 +428,7 @@ const handleSaveFooter = async () => {
             <input v-model="newSkill.items" type="text" placeholder="항목들 (쉼표 구분)" class="px-3 py-2 border rounded-lg text-sm" />
             <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold" @click="handleAddSkill">스킬 추가</button>
           </div>
-          <div v-if="initialData?.skill?.categories?.length" class="space-y-2 pt-2">
-            <div
-              v-for="(cat, idx) in initialData.skill.categories"
-              :key="idx"
-              class="p-3 bg-gray-50 border rounded-lg flex items-center justify-between"
-            >
-              <div>
-                <span class="font-bold text-sm text-gray-800">{{ cat.category }}</span>
-                <span class="ml-2 text-xs text-gray-500">({{ cat.items.join(', ') }})</span>
-              </div>
-              <button v-if="cat.id" type="button" class="text-xs text-red-600 hover:underline" @click="handleDeleteSkill(cat.id)">삭제</button>
-            </div>
-          </div>
+          <CmsEditableList :items="initialData?.skill?.categories ?? []" v-bind="listTabs.skill" @feedback="showFeedback" />
         </div>
 
         <!-- 4. Experience Tab -->
@@ -430,19 +442,7 @@ const handleSaveFooter = async () => {
           <div class="flex justify-end">
             <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold" @click="handleAddExperience">경력 추가</button>
           </div>
-          <div v-if="initialData?.experience?.list?.length" class="space-y-2 pt-2">
-            <div
-              v-for="(exp, idx) in initialData.experience.list"
-              :key="idx"
-              class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center"
-            >
-              <div>
-                <span class="font-bold text-sm text-gray-800">{{ exp.company }} - {{ exp.position }}</span>
-                <span class="ml-2 text-xs text-gray-500">{{ exp.period }}</span>
-              </div>
-              <button v-if="exp.id" type="button" class="text-xs text-red-600 hover:underline" @click="handleDeleteExperience(exp.id)">삭제</button>
-            </div>
-          </div>
+          <CmsEditableList :items="initialData?.experience?.list ?? []" v-bind="listTabs.experience" @feedback="showFeedback" />
         </div>
 
         <!-- 5. Project Tab -->
@@ -456,19 +456,7 @@ const handleSaveFooter = async () => {
           <div class="flex justify-end">
             <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold" @click="handleAddProject">프로젝트 추가</button>
           </div>
-          <div v-if="initialData?.project?.list?.length" class="space-y-2 pt-2">
-            <div
-              v-for="(proj, idx) in initialData.project.list"
-              :key="idx"
-              class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center"
-            >
-              <div>
-                <span class="font-bold text-sm text-gray-800">{{ proj.title }}</span>
-                <span class="ml-2 text-xs text-gray-500">{{ proj.period }}</span>
-              </div>
-              <button v-if="proj.id" type="button" class="text-xs text-red-600 hover:underline" @click="handleDeleteProject(proj.id)">삭제</button>
-            </div>
-          </div>
+          <CmsEditableList :items="initialData?.project?.list ?? []" v-bind="listTabs.project" @feedback="showFeedback" />
         </div>
 
         <!-- 6. Education Tab -->
@@ -482,16 +470,7 @@ const handleSaveFooter = async () => {
           <div class="flex justify-end">
             <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold" @click="handleAddEducation">학력 추가</button>
           </div>
-          <div v-if="initialData?.education?.list?.length" class="space-y-2 pt-2">
-            <div
-              v-for="(edu, idx) in initialData.education.list"
-              :key="idx"
-              class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center"
-            >
-              <span class="font-bold text-sm">{{ edu.institution }} ({{ edu.course }})</span>
-              <button v-if="edu.id" type="button" class="text-xs text-red-600 hover:underline" @click="handleDeleteEducation(edu.id)">삭제</button>
-            </div>
-          </div>
+          <CmsEditableList :items="initialData?.education?.list ?? []" v-bind="listTabs.education" @feedback="showFeedback" />
         </div>
 
         <!-- 7. Etc Tab -->
@@ -505,16 +484,7 @@ const handleSaveFooter = async () => {
           <div class="flex justify-end">
             <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold" @click="handleAddEtc">기타 추가</button>
           </div>
-          <div v-if="initialData?.etc?.certifications?.length" class="space-y-2 pt-2">
-            <div
-              v-for="(item, idx) in initialData.etc.certifications"
-              :key="idx"
-              class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center"
-            >
-              <span class="font-bold text-sm">{{ item.name }} ({{ item.issuer }})</span>
-              <button v-if="item.id" type="button" class="text-xs text-red-600 hover:underline" @click="handleDeleteEtc(item.id)">삭제</button>
-            </div>
-          </div>
+          <CmsEditableList :items="initialData?.etc?.certifications ?? []" v-bind="listTabs.etc" @feedback="showFeedback" />
         </div>
 
         <!-- 8. Footer Tab -->
