@@ -92,11 +92,11 @@ const handleSignOut = async () => {
         <Profile :payload="resumeData.profile" />
         <Introduce :payload="resumeData.introduce" />
         <HighlightCards :cards="resumeData.highlight.list" />
-        <Certification :etc-payload="resumeData.etc" />
-        <Skill :payload="resumeData.skill" />
         <Experience :payload="resumeData.experience" />
         <Project :payload="resumeData.project" />
+        <Certification :etc-payload="resumeData.etc" />
         <Education :education-payload="resumeData.education" />
+        <Skill :payload="resumeData.skill" />
         <Footer :payload="resumeData.footer" />
       </div>
     </main>
