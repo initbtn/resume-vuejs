@@ -21,7 +21,8 @@ const api = vi.hoisted(() => {
     saveEducation: ok(),
     deleteEducation: ok(),
     saveEtc: ok(),
-    deleteEtc: ok()
+    deleteEtc: ok(),
+    reorderItems: ok()
   }
 })
 
@@ -152,24 +153,37 @@ describe('CMS 목록형 탭 수정·순서 변경 (Issue #32)', () => {
       expect(wrapper.find('[data-testid="cms-edit-save"]').exists()).toBe(false)
     })
 
-    it('순서: 아래로 이동하면 인접 두 행의 order_index 를 맞바꿔 저장한다', async () => {
+    const reorderCalls = () => (api as any).reorderItems.mock.calls as [string, any[]][]
+    const reorderedRows = () => reorderCalls().flatMap(([, rows]) => rows)
+
+    it('순서: 아래로 이동하면 인접 두 행의 order_index 를 맞바꿔 한 번의 reorderItems 로 저장한다', async () => {
       const wrapper = await openTab(tab)
       await wrapper.find('[data-testid="cms-down-0"]').trigger('click')
-      await vi.waitFor(() => expect((api as any)[tab.save]).toHaveBeenCalledTimes(2))
+      await vi.waitFor(() => expect((api as any).reorderItems).toHaveBeenCalledTimes(1))
 
-      const saveFn = (api as any)[tab.save]
-      expect(saveFn).toHaveBeenCalledWith(expect.objectContaining({ id: 11, order_index: 2 }))
-      expect(saveFn).toHaveBeenCalledWith(expect.objectContaining({ id: 12, order_index: 1 }))
+      const [table, rows] = reorderCalls()[0]
+      expect(table).toBe(tab.key)
+      expect(rows).toHaveLength(2)
+      expect(rows).toEqual(expect.arrayContaining([
+        expect.objectContaining({ id: 11, order_index: 2 }),
+        expect.objectContaining({ id: 12, order_index: 1 })
+      ]))
+      // 행마다 저장하는 경로는 쓰지 않는다
+      expect((api as any)[tab.save]).not.toHaveBeenCalled()
     })
 
-    it('순서: 위로 이동하면 인접 두 행의 order_index 를 맞바꿔 저장한다', async () => {
+    it('순서: 위로 이동하면 인접 두 행의 order_index 를 맞바꿔 한 번의 reorderItems 로 저장한다', async () => {
       const wrapper = await openTab(tab)
       await wrapper.find('[data-testid="cms-up-2"]').trigger('click')
-      await vi.waitFor(() => expect((api as any)[tab.save]).toHaveBeenCalledTimes(2))
+      await vi.waitFor(() => expect((api as any).reorderItems).toHaveBeenCalledTimes(1))
 
-      const saveFn = (api as any)[tab.save]
-      expect(saveFn).toHaveBeenCalledWith(expect.objectContaining({ id: 13, order_index: 2 }))
-      expect(saveFn).toHaveBeenCalledWith(expect.objectContaining({ id: 12, order_index: 3 }))
+      const [table, rows] = reorderCalls()[0]
+      expect(table).toBe(tab.key)
+      expect(rows).toEqual(expect.arrayContaining([
+        expect.objectContaining({ id: 13, order_index: 2 }),
+        expect.objectContaining({ id: 12, order_index: 3 })
+      ]))
+      expect((api as any)[tab.save]).not.toHaveBeenCalled()
     })
 
     it('순서: 맨 위 행의 위로, 맨 아래 행의 아래로 버튼은 눌러도 저장하지 않는다', async () => {
@@ -182,7 +196,20 @@ describe('CMS 목록형 탭 수정·순서 변경 (Issue #32)', () => {
       expect(down.attributes('disabled')).toBeDefined()
       await up.trigger('click')
       await down.trigger('click')
+      expect((api as any).reorderItems).not.toHaveBeenCalled()
       expect((api as any)[tab.save]).not.toHaveBeenCalled()
+    })
+
+    it('순서: 저장이 실패하면 오류 문구를 보이고 행별 저장을 따로 시도하지 않는다 — 일부만 반영될 수 없다', async () => {
+      ;(api as any).reorderItems.mockResolvedValueOnce({ success: false, error: { message: '저장 거부됨' } })
+      const wrapper = await openTab(tab)
+      await wrapper.find('[data-testid="cms-down-0"]').trigger('click')
+      await vi.waitFor(() => expect(wrapper.text()).toContain('저장 거부됨'))
+
+      expect((api as any).reorderItems).toHaveBeenCalledTimes(1)
+      expect((api as any)[tab.save]).not.toHaveBeenCalled()
+      // 실패 뒤에도 버튼이 다시 눌린다(busy 해제)
+      await vi.waitFor(() => expect(wrapper.find('[data-testid="cms-down-0"]').attributes('disabled')).toBeUndefined())
     })
 
     // 이전 CMS 추가분은 order_index 가 모두 0 이다. 옮기지 않은 행까지 포함해 조회 순서가 의도대로여야 한다.
@@ -195,11 +222,10 @@ describe('CMS 목록형 탭 수정·순서 변경 (Issue #32)', () => {
         await wrapper.findAll('button').find((b) => b.text() === tab.label)!.trigger('click')
         return wrapper
       }
-      const saved = () => (api as any)[tab.save].mock.calls.map((c: any[]) => c[0])
       // 저장 결과를 원래 값 위에 덮어 조회(order_index 오름차순, 동점은 원래 위치) 순서를 재현한다
       const resultingIds = () => {
         const current = new Map<number, number>([[11, values[0] ?? -1], [12, values[1] ?? -1], [13, values[2] ?? -1]])
-        saved().forEach((row: any) => current.set(row.id, row.order_index))
+        reorderedRows().forEach((row: any) => current.set(row.id, row.order_index))
         // 동점이면 DB 조회 순서가 보장되지 않으므로 최종 값은 모두 달라야 한다
         expect(new Set(current.values()).size).toBe(3)
         return [11, 12, 13].sort((x, y) => current.get(x)! - current.get(y)! || x - y)
@@ -207,16 +233,18 @@ describe('CMS 목록형 탭 수정·순서 변경 (Issue #32)', () => {
 
       let wrapper = await open()
       await wrapper.find('[data-testid="cms-down-0"]').trigger('click')
-      await vi.waitFor(() => expect(saved().length).toBeGreaterThan(0))
+      await vi.waitFor(() => expect(reorderCalls().length).toBe(1))
       await vi.waitFor(() => expect(wrapper.find('[data-testid="cms-down-0"]').attributes('disabled')).toBeUndefined())
       expect(resultingIds()).toEqual([12, 11, 13])
 
-      ;(api as any)[tab.save].mockClear()
+      ;(api as any).reorderItems.mockClear()
       wrapper = await open()
       await wrapper.find('[data-testid="cms-up-2"]').trigger('click')
-      await vi.waitFor(() => expect(saved().length).toBeGreaterThan(0))
+      await vi.waitFor(() => expect(reorderCalls().length).toBe(1))
       await vi.waitFor(() => expect(wrapper.find('[data-testid="cms-up-2"]').attributes('disabled')).toBeUndefined())
       expect(resultingIds()).toEqual([11, 13, 12])
+      // 어느 경우든 한 번의 요청이다
+      expect(reorderCalls()).toHaveLength(1)
     })
 
     it('추가: 새 행의 order_index 는 현재 목록 최대값 + 1 이다', async () => {

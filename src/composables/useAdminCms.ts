@@ -23,6 +23,19 @@ type EducationInsert = Database['public']['Tables']['education']['Insert']
 type EtcInsert = Database['public']['Tables']['etc']['Insert']
 type FooterInsert = Database['public']['Tables']['footer']['Insert']
 
+export type ReorderTable = 'highlight' | 'skill' | 'experience' | 'project' | 'education' | 'etc'
+
+// 순서 이동은 행 전체를 upsert 로 보낸다 — 일부 열만 보내면 삽입 시도 행의 NOT NULL 검사에 걸릴 수 있다
+const REORDER_COLUMNS: Record<ReorderTable, string[]> = {
+  highlight: ['title', 'description', 'keywords'],
+  skill: ['category', 'items'],
+  experience: ['company', 'position', 'period', 'description', 'projects'],
+  project: ['title', 'period', 'where', 'description', 'achievements', 'skills', 'link'],
+  education: ['institution', 'course', 'period'],
+  etc: ['name', 'issuer', 'date']
+}
+const ARRAY_COLUMNS = new Set(['keywords', 'items', 'achievements', 'skills', 'projects'])
+
 export function useAdminCms(options: UseAdminCmsOptions = {}) {
   const loading = ref<boolean>(false)
   const error = ref<Error | null>(null)
@@ -495,6 +508,37 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     }
   }
 
+  // 순서 이동: 바뀌는 행을 한 번의 upsert(배열)로 저장한다 — 중간에 실패해도 일부만 반영되지 않는다
+  const reorderItems = async (table: ReorderTable, rows: Array<Record<string, any>>): Promise<CmsOperationResult> => {
+    error.value = null
+    if (rows.length === 0) return { success: true }
+    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    if (rows.some((r) => r.id === undefined || r.id === null)) {
+      return handleError(new Error('순서를 바꿀 행의 id 가 없습니다.'))
+    }
+
+    try {
+      loading.value = true
+      const now = new Date().toISOString()
+      const payload = rows.map((r) => {
+        const row: Record<string, unknown> = { id: r.id }
+        for (const col of REORDER_COLUMNS[table]) {
+          row[col] = r[col] ?? (ARRAY_COLUMNS.has(col) ? [] : null)
+        }
+        row.order_index = r.order_index
+        row.updated_at = now
+        return row
+      })
+      const { data, error: dbError } = await (client.from(table) as any).upsert(payload)
+      if (dbError) return handleError(dbError)
+      return await handleSuccess(data)
+    } catch (err) {
+      return handleError(err)
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     loading,
     error,
@@ -512,6 +556,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     deleteEtc,
     saveHighlight,
     deleteHighlight,
+    reorderItems,
     updateFooter
   }
 }
