@@ -118,6 +118,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
         data.value.highlight = {
           list: highlightRes.data.map((row: any) => ({
             id: row.id,
+            order_index: row.order_index,
             title: row.title,
             description: row.description,
             keywords: row.keywords || []
@@ -130,6 +131,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
         data.value.skill = {
           categories: skillRes.data.map((row: any) => ({
             id: row.id,
+            order_index: row.order_index,
             category: row.category,
             items: row.items || []
           }))
@@ -141,6 +143,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
         data.value.experience = {
           list: experienceRes.data.map((row: any) => ({
             id: row.id,
+            order_index: row.order_index,
             company: row.company,
             position: row.position,
             period: row.period,
@@ -155,6 +158,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
         data.value.project = {
           list: projectRes.data.map((row: any) => ({
             id: row.id,
+            order_index: row.order_index,
             title: row.title,
             period: row.period,
             where: row.where || undefined,
@@ -171,6 +175,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
         data.value.education = {
           list: educationRes.data.map((row: any) => ({
             id: row.id,
+            order_index: row.order_index,
             institution: row.institution,
             course: row.course,
             period: row.period
@@ -183,6 +188,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
         data.value.etc = {
           certifications: etcRes.data.map((row: any) => ({
             id: row.id,
+            order_index: row.order_index,
             name: row.name,
             issuer: row.issuer,
             date: row.date

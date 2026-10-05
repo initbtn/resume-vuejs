@@ -13,6 +13,7 @@ export interface IIntroduce {
 
 export interface ISkillCategory {
   id?: number
+  order_index?: number
   category: string
   items: string[]
 }
@@ -31,6 +32,7 @@ export interface IExperienceProject {
 
 export interface IExperienceItem {
   id?: number
+  order_index?: number
   company: string
   position: string
   period: string
@@ -44,6 +46,7 @@ export interface IExperience {
 
 export interface IHighlightItem {
   id?: number
+  order_index?: number
   title: string
   description: string
   keywords: string[]
@@ -55,6 +58,7 @@ export interface IHighlight {
 
 export interface IProjectItem {
   id?: number
+  order_index?: number
   title: string
   period: string
   where?: string
@@ -70,6 +74,7 @@ export interface IProject {
 
 export interface IEducationItem {
   id?: number
+  order_index?: number
   institution: string
   course: string
   period: string
@@ -81,6 +86,7 @@ export interface IEducation {
 
 export interface ICertificationItem {
   id?: number
+  order_index?: number
   name: string
   issuer: string
   date: string
