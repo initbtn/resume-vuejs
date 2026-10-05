@@ -23,6 +23,6 @@ CREATE POLICY "Allow authenticated write access" ON public.highlight
 
 TRUNCATE TABLE public.highlight RESTART IDENTITY;
 INSERT INTO public.highlight (title, description, keywords, order_index) VALUES
-('Startup to Enterprise', '5인 스타트업부터 대기업까지, 다양한 규모의 조직에서 성장한 풀스택 커리어', ARRAY['Adaptability', 'Growth', 'Leadership'], 0),
-('Product-Driven Architecture', '비즈니스 요구사항 구체화부터 대규모 시스템 설계, 성능 최적화, 성과 측정까지 전 과정을 주도', ARRAY['System Design', 'Optimization', 'Business Impact'], 1),
-('Knowledge Sharing', '400여 개 기술 포스트, 다수의 외부 발표와 멘토링으로 개발 커뮤니티에 꾸준히 기여', ARRAY['Blog', 'Mentoring', 'Open Source'], 2);
+('User-Centered Development', '조선·해양 현장, 교육, 보험 서비스 등 다양한 도메인을 경험하며 사용자의 입장에서 불편을 먼저 살피고, 화면과 오류 처리까지 사용자 관점에서 고민하며 개발하려 노력합니다', ARRAY['User Perspective', 'Diverse Experience', 'UX Details'], 0),
+('Partner Communication', '작은 팀에서 보험사·보험협회·PG·본인인증·블록체인 등 외부 파트너와의 소통을 직접 맡아 정산, 클레임, 시스템 연계를 조율하며 협업하는 법을 배우고 있습니다', ARRAY['External Collaboration', 'Coordination', 'Communication'], 1),
+('Documentation & Records', '팀 업무와 개인 프로젝트 모두에서 이슈와 PR로 작업의 이유와 과정을 기록해, 동료가 읽고 이어받을 수 있는 흔적을 남기려 노력합니다', ARRAY['Documentation', 'Issue Tracking', 'Knowledge Sharing'], 2);
