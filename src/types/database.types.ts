@@ -52,7 +52,7 @@ export type Database = {
         Insert: {
           course: string
           created_at?: string
-          id?: never
+          id?: number
           institution: string
           order_index?: number
           period: string
@@ -61,7 +61,7 @@ export type Database = {
         Update: {
           course?: string
           created_at?: string
-          id?: never
+          id?: number
           institution?: string
           order_index?: number
           period?: string
@@ -82,7 +82,7 @@ export type Database = {
         Insert: {
           created_at?: string
           date: string
-          id?: never
+          id?: number
           issuer: string
           name: string
           order_index?: number
@@ -91,7 +91,7 @@ export type Database = {
         Update: {
           created_at?: string
           date?: string
-          id?: never
+          id?: number
           issuer?: string
           name?: string
           order_index?: number
@@ -115,7 +115,7 @@ export type Database = {
           company: string
           created_at?: string
           description?: string | null
-          id?: never
+          id?: number
           order_index?: number
           period: string
           position: string
@@ -126,7 +126,7 @@ export type Database = {
           company?: string
           created_at?: string
           description?: string | null
-          id?: never
+          id?: number
           order_index?: number
           period?: string
           position?: string
@@ -178,7 +178,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description: string
-          id?: never
+          id?: number
           keywords?: string[]
           order_index?: number
           title: string
@@ -187,7 +187,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string
-          id?: never
+          id?: number
           keywords?: string[]
           order_index?: number
           title?: string
@@ -270,7 +270,7 @@ export type Database = {
           achievements?: string[]
           created_at?: string
           description?: string | null
-          id?: never
+          id?: number
           link?: string | null
           order_index?: number
           period: string
@@ -283,7 +283,7 @@ export type Database = {
           achievements?: string[]
           created_at?: string
           description?: string | null
-          id?: never
+          id?: number
           link?: string | null
           order_index?: number
           period?: string
@@ -306,7 +306,7 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
-          id?: never
+          id?: number
           items?: string[]
           order_index?: number
           updated_at?: string
@@ -314,7 +314,7 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
-          id?: never
+          id?: number
           items?: string[]
           order_index?: number
           updated_at?: string
