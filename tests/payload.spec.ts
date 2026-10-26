@@ -44,7 +44,7 @@ describe('Payload Domain Integrity & 5 Key KPIs', () => {
     expect(allAchievements.some((a) => a.includes('장애 대응 리드타임을 평균 15분 이내로 약 80% 이상 단축'))).toBe(true)
   })
 
-  it('should list resume-vuejs and busan-youth-day projects in 2026 (marine GIS removed)', () => {
+  it('should list resume-vuejs, busan-youth-day, marine-sensor-gis, and assist projects in 2026', () => {
     const projects = Payload.project.list
 
     expect(projects.some((p) => p.period.includes('2024'))).toBe(false)
@@ -54,12 +54,20 @@ describe('Payload Domain Integrity & 5 Key KPIs', () => {
     expect(resumeVue?.period).toContain('2026')
     expect(resumeVue?.period).toContain('현재')
 
-    expect(projects.some((p) => p.title.includes('해양 친환경 설비'))).toBe(false)
-
     const byd = projects.find((p) => p.title.includes('busan-youth-day'))
     expect(byd).toBeDefined()
     expect(byd?.period).toContain('2026.09')
     expect(byd?.link).toBe('https://github.com/initbtn/busan-youth-day')
+
+    const marineGis = projects.find((p) => p.title.includes('marine-sensor-gis'))
+    expect(marineGis).toBeDefined()
+    expect(marineGis?.period).toContain('2026.10')
+    expect(marineGis?.link).toBe('https://github.com/initbtn/marine-sensor-gis')
+
+    const assist = projects.find((p) => p.title.includes('assist'))
+    expect(assist).toBeDefined()
+    expect(assist?.period).toContain('2026.10')
+    expect(assist?.link).toBe('https://github.com/initbtn/assist')
   })
 
   const EXPECTED_SKILL = [
