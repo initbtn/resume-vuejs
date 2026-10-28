@@ -10,6 +10,9 @@ import authHandler from '../api/auth'
 describe('WAS API Gateway & Client Integration (Issue #50)', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.clear()
+    }
   })
 
   describe('apiClient Gateway Functions', () => {
@@ -100,14 +103,14 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
     })
   })
 
-  describe('useAdminCms with WAS Gateway', () => {
-    it('client가 null일 때 updateProfile이 WAS 게이트웨이를 경유하여 호출되어야 한다', async () => {
+  describe('useAdminCms with WAS Gateway and Bearer Token', () => {
+    it('client가 null일 때 updateProfile이 WAS 게이트웨이를 경유하여 호출되고 토큰이 전달되어야 한다', async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ success: true, data: { id: 'default' } })
       } as any)
 
-      const { updateProfile } = useAdminCms({ client: null })
+      const { updateProfile } = useAdminCms({ client: null, token: 'custom-admin-jwt' })
       const res = await updateProfile({
         name: '게이트웨이수정',
         position: 'Architect',
@@ -119,33 +122,75 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
         '/api/cms',
         expect.objectContaining({
           method: 'POST',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer custom-admin-jwt'
+          }),
           body: expect.stringContaining('profile')
+        })
+      )
+    })
+
+    it('localStorage에 저장된 토큰이 있을 때 token 옵션 없이도 헤더에 주입되어야 한다', async () => {
+      window.localStorage.setItem('resume_admin_token', 'local-saved-token')
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: true, data: { id: 'default' } })
+      } as any)
+
+      const { updateProfile } = useAdminCms({ client: null })
+      const res = await updateProfile({
+        name: '로컬토큰수정',
+        position: 'Architect',
+        email: 'arch@test.com'
+      })
+
+      expect(res.success).toBe(true)
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/cms',
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer local-saved-token'
+          })
         })
       )
     })
   })
 
-  describe('useAuth with WAS Gateway', () => {
-    it('client가 null일 때 signIn이 WAS 게이트웨이를 경유하여 로그인되어야 한다', async () => {
+  describe('useAuth with WAS Gateway and Persistence', () => {
+    it('client가 null일 때 signIn이 성공하면 localStorage에 토큰이 영속화되어야 한다', async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
           success: true,
           user: { id: 'gw-user-1', email: 'admin@gw.com' },
-          session: { access_token: 'gw-token' }
+          session: { access_token: 'gw-jwt-secret' }
         })
       } as any)
 
-      const { signIn, user, isAuthenticated } = useAuth({ client: null })
+      const { signIn, user, isAuthenticated } = useAuth({ client: null, autoInitialize: false })
       const res = await signIn('admin@gw.com', 'password123')
 
       expect(res.success).toBe(true)
       expect(user.value?.id).toBe('gw-user-1')
       expect(isAuthenticated.value).toBe(true)
+      expect(window.localStorage.getItem('resume_admin_token')).toBe('gw-jwt-secret')
+    })
+
+    it('signOut 호출 시 localStorage의 세션 토큰이 삭제되어야 한다', async () => {
+      window.localStorage.setItem('resume_admin_token', 'active-token')
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: true })
+      } as any)
+
+      const { signOut } = useAuth({ client: null, autoInitialize: false })
+      await signOut()
+
+      expect(window.localStorage.getItem('resume_admin_token')).toBeNull()
     })
   })
 
-  describe('Serverless Handlers Method & CORS Guard', () => {
+  describe('Serverless Handlers Method, CORS and Auth Guards', () => {
     it('resumeHandler should return 405 for POST request', async () => {
       const req: any = { method: 'POST', headers: {} }
       let statusCode = 0
@@ -178,6 +223,27 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
 
       await cmsHandler(req, res)
       expect(statusCode).toBe(405)
+    })
+
+    it('cmsHandler should return 401 when Authorization Bearer token is missing', async () => {
+      process.env.SUPABASE_URL = 'https://mock.supabase.co'
+      process.env.SUPABASE_ANON_KEY = 'mock-key'
+
+      const req: any = { method: 'POST', headers: {} }
+      let statusCode = 0
+      let responseBody = ''
+      const res: any = {
+        setHeader: vi.fn(),
+        statusCode: 0,
+        end: (data?: string) => {
+          statusCode = res.statusCode
+          if (data) responseBody = data
+        }
+      }
+
+      await cmsHandler(req, res)
+      expect(statusCode).toBe(401)
+      expect(responseBody).toContain('Unauthorized')
     })
 
     it('authHandler should return 405 for GET request', async () => {

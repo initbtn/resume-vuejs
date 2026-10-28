@@ -1,7 +1,7 @@
 import { ref, onMounted, type Ref } from 'vue'
 import type { PayloadType } from '../payload/types'
 import { Payload } from '../payload'
-import { supabase, type TypedSupabaseClient } from '../lib/supabase'
+import type { TypedSupabaseClient } from '../lib/supabase'
 import { fetchResumeFromGateway } from '../lib/apiClient'
 
 export interface UseResumeDataOptions {
@@ -19,7 +19,7 @@ export interface UseResumeDataReturn {
 }
 
 export function useResumeData(options: UseResumeDataOptions = {}): UseResumeDataReturn {
-  const activeClient = options.client !== undefined ? options.client : supabase
+  const activeClient = options.client !== undefined ? options.client : null
 
   // 깊은 복사로 초기 로컬 fallback 데이터 생성
   const initialData: PayloadType = {

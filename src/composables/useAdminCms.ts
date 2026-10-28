@@ -1,10 +1,11 @@
 import { ref } from 'vue'
-import { supabase, type TypedSupabaseClient } from '../lib/supabase'
+import type { TypedSupabaseClient } from '../lib/supabase'
 import type { Database } from '../types/database.types'
 import { sendCmsToGateway } from '../lib/apiClient'
 
 export interface UseAdminCmsOptions {
   client?: TypedSupabaseClient | null
+  token?: string | null
   onSuccess?: () => Promise<void> | void
 }
 
@@ -25,7 +26,7 @@ type EtcInsert = Database['public']['Tables']['etc']['Insert']
 type FooterInsert = Database['public']['Tables']['footer']['Insert']
 
 export function useAdminCms(options: UseAdminCmsOptions = {}) {
-  const client = options.client !== undefined ? options.client : supabase
+  const client = options.client !== undefined ? options.client : null
   const loading = ref<boolean>(false)
   const error = ref<Error | null>(null)
 
@@ -43,6 +44,14 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     return { success: false, error: errorObj }
   }
 
+  const getToken = (): string | undefined => {
+    if (options.token) return options.token
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return window.localStorage.getItem('resume_admin_token') || undefined
+    }
+    return undefined
+  }
+
   const checkClientOrGateway = () => {
     if (!client && typeof fetch === 'undefined') {
       return new Error('Supabase 클라이언트 또는 WAS 게이트웨이가 설정되지 않았습니다.')
@@ -54,7 +63,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     if (client) {
       return await (client as any).from(table).upsert(row)
     }
-    const res = await sendCmsToGateway(table, 'upsert', row)
+    const res = await sendCmsToGateway(table, 'upsert', row, getToken())
     return { data: res.data, error: res.error }
   }
 
@@ -62,7 +71,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     if (client) {
       return await (client as any).from(table).delete().eq('id', id)
     }
-    const res = await sendCmsToGateway(table, 'delete', { id })
+    const res = await sendCmsToGateway(table, 'delete', { id }, getToken())
     return { data: res.data, error: res.error }
   }
 

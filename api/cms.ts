@@ -2,6 +2,18 @@ import type { IncomingMessage, ServerResponse } from 'http'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '../src/types/database.types'
 
+const ALLOWED_TABLES = [
+  'profile',
+  'introduce',
+  'highlight',
+  'skill',
+  'experience',
+  'project',
+  'education',
+  'etc',
+  'footer'
+]
+
 async function parseBody(req: IncomingMessage): Promise<any> {
   return new Promise((resolve, reject) => {
     let body = ''
@@ -49,7 +61,26 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return
   }
 
+  // 1. Bearer Token Verification
+  const authHeader = req.headers['authorization'] || (req as any).headers?.authorization
+  const token = typeof authHeader === 'string' && authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null
+
+  if (!token) {
+    res.statusCode = 401
+    res.end(JSON.stringify({ success: false, error: 'Unauthorized: Missing or invalid Bearer token' }))
+    return
+  }
+
+  const supabase = createClient<Database>(supabaseUrl, supabaseKey)
+
   try {
+    const { data: userData, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !userData?.user) {
+      res.statusCode = 401
+      res.end(JSON.stringify({ success: false, error: 'Unauthorized: Invalid token' }))
+      return
+    }
+
     const body = (req as any).body || (await parseBody(req))
     const { table, action, payload } = body || {}
 
@@ -59,7 +90,17 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       return
     }
 
-    const supabase = createClient<Database>(supabaseUrl, supabaseKey)
+    // 2. Allowed Tables Whitelist
+    if (!ALLOWED_TABLES.includes(table)) {
+      res.statusCode = 400
+      res.end(
+        JSON.stringify({
+          success: false,
+          error: `Invalid table: ${table}. Allowed tables: ${ALLOWED_TABLES.join(', ')}`
+        })
+      )
+      return
+    }
 
     if (action === 'upsert') {
       const onConflict = ['profile', 'introduce', 'footer'].includes(table) ? 'id' : 'id'

@@ -1,8 +1,10 @@
 import { ref, computed } from 'vue'
 import type { Ref, ComputedRef } from 'vue'
 import type { User, Session, AuthError } from '@supabase/supabase-js'
-import { supabase, type TypedSupabaseClient } from '../lib/supabase'
+import type { TypedSupabaseClient } from '../lib/supabase'
 import { authGatewayRequest } from '../lib/apiClient'
+
+const TOKEN_STORAGE_KEY = 'resume_admin_token'
 
 export interface UseAuthOptions {
   client?: TypedSupabaseClient | null
@@ -29,7 +31,7 @@ export interface UseAuthReturn {
 }
 
 export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
-  const client = options.client !== undefined ? options.client : supabase
+  const client = options.client !== undefined ? options.client : null
   const autoInitialize = options.autoInitialize ?? true
 
   const user = ref<User | null>(null)
@@ -41,6 +43,25 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
 
   const initialize = async () => {
     if (!client) {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const storedToken = window.localStorage.getItem(TOKEN_STORAGE_KEY)
+        if (storedToken) {
+          try {
+            loading.value = true
+            const res = await authGatewayRequest('getUser', { token: storedToken })
+            if (res.success && res.user) {
+              user.value = res.user
+              session.value = { access_token: storedToken, user: res.user } as any
+            } else {
+              window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+            }
+          } catch {
+            window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+          } finally {
+            loading.value = false
+          }
+        }
+      }
       return
     }
 
@@ -93,6 +114,9 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
         }
         user.value = res.user
         session.value = res.session
+        if (typeof window !== 'undefined' && window.localStorage && res.session?.access_token) {
+          window.localStorage.setItem(TOKEN_STORAGE_KEY, res.session.access_token)
+        }
         return { success: true, user: res.user, session: res.session }
       } catch (err: any) {
         const handledError = err instanceof Error ? err : new Error(String(err))
@@ -136,6 +160,10 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
   }
 
   const signOut = async (): Promise<void> => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+    }
+
     if (client) {
       try {
         loading.value = true
@@ -164,7 +192,7 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
     }
   }
 
-  if (autoInitialize && client) {
+  if (autoInitialize) {
     initialize()
   }
 
