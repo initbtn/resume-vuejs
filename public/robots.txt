@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://initbtn.github.io/resume-vuejs/sitemap.xml
