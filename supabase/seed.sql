@@ -139,9 +139,9 @@ INSERT INTO public.project (title, period, "where", description, achievements, s
   ARRAY[
     'Next.js 데이터 구조를 Vue 3 Single File Component(<script setup lang="ts">)로 전면 포팅 및 완전 타입 바인딩',
     'Vitest 기반 단위 테스트 TDD 파이프라인 및 GitHub Actions Pages 자동 배포 체계 수립',
-    'Supabase BaaS 연동 및 원격 장애/부재 시 정적 로컬 payload로 100% 자동 Fallback되는 방어 로직 구현'
+    'WAS API 게이트웨이(/api/*) 구축을 통한 브라우저 자격증명 완전 은닉(Zero Client Secrets) 및 장애 시 100% 자동 Fallback 하이브리드 아키텍처 수립'
   ],
-  ARRAY['Vue.js 3', 'TypeScript', 'Vite', 'Vitest', 'TailwindCSS', 'Supabase', 'GitHub Actions'],
+  ARRAY['Vue.js 3', 'TypeScript', 'Vite', 'Vitest', 'TailwindCSS', 'Supabase', 'Vercel', 'GitHub Actions'],
   'https://github.com/initbtn/resume-vuejs',
   1
 ),
@@ -168,7 +168,7 @@ INSERT INTO public.project (title, period, "where", description, achievements, s
     '부산항~대한해협(TSS) 서수로 실제 해상 항로 데드레커닝 항행 엔진 및 IEC 62288 침로 벡터/16방위 나침반 툴팁 연동',
     'Zustand 기반 10Hz 고빈도 텔레메트리 스트림 영속 App Shell 라우팅 및 무중단 HMI 4대 직무 관제 뷰 구축',
     '개인정보 미수집(Zero-PII) 단방향 해시 식별자(usr_****) 세션 인증 및 실시간 동시 접속자 DAU 감사 트레일 구축',
-    'IMO MARPOL Annex VI 법정 보존 24개월 데이터 Cloudflare R2 Parquet 압축 아카이빙 및 PDF 감사 리포트 연동'
+    'IMO MARPOL 법정 보존 데이터 Cloudflare R2 아카이빙 및 WAS 단일 게이트웨이·클라이언트 스토리지 쓰기 차단 보안 아키텍처 수립'
   ],
   ARRAY['React 18', 'TypeScript', 'Leaflet GIS', 'Apache ECharts', 'Zustand', 'TailwindCSS', 'Supabase', 'Cloudflare R2', 'Vitest', 'Playwright', 'Vercel'],
   'https://github.com/initbtn/marine-sensor-gis',
