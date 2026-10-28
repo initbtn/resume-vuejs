@@ -24,6 +24,7 @@
 | **배포(⑩)** | GitHub Actions $\rightarrow$ GitHub Pages (`gh-pages`) | `main` 머지 시 자동 빌드 배포 |
 | **Supabase 배선** | pass on-demand 자격증명 주입 | `token`: `pass show supabase.com/token-min2spapa`<br>`db-pass`: `pass show supabase.com/passward-db`<br>`ref`: `rhkrhkxrnpfnrqxwjojo` |
 | **보안 (Network Restrictions)** | 개발자 공인 IP CIDR 화이트리스트 | DB 직접 연결(5432/6543) 제한 (`scripts/supabase.sh network-allow-ip`, `network-restrictions get`) |
+| **보안 (WAS 게이트웨이)** | WAS 단일 공개 게이트웨이 및 스토리지 규율 | 1. WAS가 유일하게 공개된 API 게이트웨이이며, 클라이언트 브라우저에서 직접 Supabase DB에 접근하거나 브라우저에 접속 정보가 노출되어서는 안 됨 (모든 DB 접근은 WAS/API 게이트웨이 `/api/*` 경유)<br>2. 클라이언트 브라우저가 스토리지(R2/S3)에 직접 쓰기(Presigned PUT 직접 업로드 포함)를 수행하도록 공개되어서는 안 되며, 파일 업로드는 WAS 게이트웨이를 경유해 백엔드에서 스토리지 SDK로 저장되어야 함 |
 | **보안 (CORS & URL)** | 허용 Origin 명시 | `site_url`: `https://initbtn.github.io/resume-vuejs/`<br>`uri_allow_list`: `http://localhost:5173,https://initbtn.github.io/**` |
 | **warming** | pass / gpg-agent | 자격 증명 캐시 상태 점검 후 실행 |
 | **Vue 구조(②)** | SFC 는 UI 렌더링만 맡고, 데이터 fetch·구독·타이머 같은 부수효과와 상태는 composable(`use*`)로 뺀다(SRP). 새 변종은 기존 `v-if`·분기를 고치지 않고 공통 props·emit 계약을 따르는 컴포넌트를 레지스트리에 등록한다(OCP). 같은 계약을 따르는 컴포넌트는 서로 바꿔 끼울 수 있다(LSP). 컴포넌트에는 쓰는 props 만 좁게 넘기고 store·응답 객체째 넘기지 않는다(ISP). 컴포넌트는 I/O 클라이언트를 직접 만들거나 import 하지 않고 composable·provide/inject·props 로 받는다(DIP) | SFC 는 UI, 부수효과·상태는 composable |

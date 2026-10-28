@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { supabase, type TypedSupabaseClient } from '../lib/supabase'
 import type { Database } from '../types/database.types'
+import { sendCmsToGateway } from '../lib/apiClient'
 
 export interface UseAdminCmsOptions {
   client?: TypedSupabaseClient | null
@@ -42,6 +43,29 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     return { success: false, error: errorObj }
   }
 
+  const checkClientOrGateway = () => {
+    if (!client && typeof fetch === 'undefined') {
+      return new Error('Supabase 클라이언트 또는 WAS 게이트웨이가 설정되지 않았습니다.')
+    }
+    return null
+  }
+
+  const executeUpsert = async (table: string, row: any) => {
+    if (client) {
+      return await (client as any).from(table).upsert(row)
+    }
+    const res = await sendCmsToGateway(table, 'upsert', row)
+    return { data: res.data, error: res.error }
+  }
+
+  const executeDelete = async (table: string, id: string | number) => {
+    if (client) {
+      return await (client as any).from(table).delete().eq('id', id)
+    }
+    const res = await sendCmsToGateway(table, 'delete', { id })
+    return { data: res.data, error: res.error }
+  }
+
   // 1. Profile Update
   const updateProfile = async (payload: {
     name: string
@@ -56,9 +80,8 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
       return handleError(new Error('이름, 포지션, 이메일 등 필수 항목을 모두 입력해주세요.'))
     }
 
-    if (!client) {
-      return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
-    }
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
 
     try {
       loading.value = true
@@ -73,7 +96,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         updated_at: new Date().toISOString()
       }
 
-      const { data, error: dbError } = await client.from('profile').upsert(row)
+      const { data, error: dbError } = await executeUpsert('profile', row)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -86,7 +109,8 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
   // 2. Introduce Update
   const updateIntroduce = async (contents: string[]): Promise<CmsOperationResult> => {
     error.value = null
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
 
     try {
       loading.value = true
@@ -96,7 +120,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         updated_at: new Date().toISOString()
       }
 
-      const { data, error: dbError } = await client.from('introduce').upsert(row)
+      const { data, error: dbError } = await executeUpsert('introduce', row)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -117,7 +141,8 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     if (!category.category.trim()) {
       return handleError(new Error('카테고리 이름을 입력해주세요.'))
     }
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
 
     try {
       loading.value = true
@@ -131,7 +156,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         row.id = category.id as never
       }
 
-      const { data, error: dbError } = await client.from('skill').upsert(row)
+      const { data, error: dbError } = await executeUpsert('skill', row)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -142,10 +167,11 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
   }
 
   const deleteSkill = async (id: number): Promise<CmsOperationResult> => {
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
     try {
       loading.value = true
-      const { data, error: dbError } = await client.from('skill').delete().eq('id', id)
+      const { data, error: dbError } = await executeDelete('skill', id)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -169,7 +195,8 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     if (!exp.company.trim() || !exp.position.trim() || !exp.period.trim()) {
       return handleError(new Error('회사명, 직무, 기간은 필수 입력 항목입니다.'))
     }
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
 
     try {
       loading.value = true
@@ -186,7 +213,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         row.id = exp.id as never
       }
 
-      const { data, error: dbError } = await client.from('experience').upsert(row)
+      const { data, error: dbError } = await executeUpsert('experience', row)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -197,10 +224,11 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
   }
 
   const deleteExperience = async (id: number): Promise<CmsOperationResult> => {
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
     try {
       loading.value = true
-      const { data, error: dbError } = await client.from('experience').delete().eq('id', id)
+      const { data, error: dbError } = await executeDelete('experience', id)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -226,7 +254,8 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     if (!proj.title.trim() || !proj.period.trim()) {
       return handleError(new Error('프로젝트명과 기간은 필수 항목입니다.'))
     }
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
 
     try {
       loading.value = true
@@ -245,7 +274,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         row.id = proj.id as never
       }
 
-      const { data, error: dbError } = await client.from('project').upsert(row)
+      const { data, error: dbError } = await executeUpsert('project', row)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -256,10 +285,11 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
   }
 
   const deleteProject = async (id: number): Promise<CmsOperationResult> => {
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
     try {
       loading.value = true
-      const { data, error: dbError } = await client.from('project').delete().eq('id', id)
+      const { data, error: dbError } = await executeDelete('project', id)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -281,7 +311,8 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     if (!edu.institution.trim() || !edu.course.trim() || !edu.period.trim()) {
       return handleError(new Error('기관명, 과정명, 기간은 필수 항목입니다.'))
     }
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
 
     try {
       loading.value = true
@@ -296,7 +327,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         row.id = edu.id as never
       }
 
-      const { data, error: dbError } = await client.from('education').upsert(row)
+      const { data, error: dbError } = await executeUpsert('education', row)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -307,10 +338,11 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
   }
 
   const deleteEducation = async (id: number): Promise<CmsOperationResult> => {
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
     try {
       loading.value = true
-      const { data, error: dbError } = await client.from('education').delete().eq('id', id)
+      const { data, error: dbError } = await executeDelete('education', id)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -332,7 +364,8 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     if (!item.name.trim() || !item.issuer.trim() || !item.date.trim()) {
       return handleError(new Error('자격증/활동명, 발급처, 취득일은 필수 항목입니다.'))
     }
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
 
     try {
       loading.value = true
@@ -347,7 +380,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         row.id = item.id as never
       }
 
-      const { data, error: dbError } = await client.from('etc').upsert(row)
+      const { data, error: dbError } = await executeUpsert('etc', row)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -358,10 +391,11 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
   }
 
   const deleteEtc = async (id: number): Promise<CmsOperationResult> => {
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
     try {
       loading.value = true
-      const { data, error: dbError } = await client.from('etc').delete().eq('id', id)
+      const { data, error: dbError } = await executeDelete('etc', id)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -383,7 +417,8 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     if (!item.title.trim() || !item.description.trim()) {
       return handleError(new Error('핵심 역량 카드의 제목과 설명은 필수 항목입니다.'))
     }
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
 
     try {
       loading.value = true
@@ -398,7 +433,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         row.id = item.id as never
       }
 
-      const { data, error: dbError } = await client.from('highlight').upsert(row)
+      const { data, error: dbError } = await executeUpsert('highlight', row)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -409,10 +444,11 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
   }
 
   const deleteHighlight = async (id: number): Promise<CmsOperationResult> => {
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
     try {
       loading.value = true
-      const { data, error: dbError } = await client.from('highlight').delete().eq('id', id)
+      const { data, error: dbError } = await executeDelete('highlight', id)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
@@ -433,7 +469,8 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     if (!payload.github?.trim() || !payload.sign?.trim()) {
       return handleError(new Error('GitHub 링크와 서명 문구는 필수 항목입니다.'))
     }
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gateErr = checkClientOrGateway()
+    if (gateErr) return handleError(gateErr)
 
     try {
       loading.value = true
@@ -446,7 +483,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         updated_at: new Date().toISOString()
       }
 
-      const { data, error: dbError } = await client.from('footer').upsert(row)
+      const { data, error: dbError } = await executeUpsert('footer', row)
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {

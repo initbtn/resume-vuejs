@@ -2,9 +2,11 @@ import { ref, onMounted, type Ref } from 'vue'
 import type { PayloadType } from '../payload/types'
 import { Payload } from '../payload'
 import { supabase, type TypedSupabaseClient } from '../lib/supabase'
+import { fetchResumeFromGateway } from '../lib/apiClient'
 
 export interface UseResumeDataOptions {
   client?: TypedSupabaseClient | null
+  apiUrl?: string
   autoFetch?: boolean
 }
 
@@ -38,13 +40,48 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
   const source = ref<'supabase' | 'fallback'>('fallback')
 
   const fetchData = async (): Promise<void> => {
+    loading.value = true
+    error.value = null
+
     if (!activeClient) {
+      try {
+        const gatewayData = await fetchResumeFromGateway(options.apiUrl || '/api/resume')
+        if (gatewayData) {
+          if (gatewayData.profile) data.value.profile = { ...data.value.profile, ...gatewayData.profile }
+          if (gatewayData.introduce?.contents && gatewayData.introduce.contents.length > 0) {
+            data.value.introduce = { contents: gatewayData.introduce.contents }
+          }
+          if (gatewayData.highlight?.list && gatewayData.highlight.list.length > 0) {
+            data.value.highlight = { list: gatewayData.highlight.list }
+          }
+          if (gatewayData.skill?.categories && gatewayData.skill.categories.length > 0) {
+            data.value.skill = { categories: gatewayData.skill.categories }
+          }
+          if (gatewayData.experience?.list && gatewayData.experience.list.length > 0) {
+            data.value.experience = { list: gatewayData.experience.list }
+          }
+          if (gatewayData.project?.list && gatewayData.project.list.length > 0) {
+            data.value.project = { list: gatewayData.project.list }
+          }
+          if (gatewayData.education?.list && gatewayData.education.list.length > 0) {
+            data.value.education = { list: gatewayData.education.list }
+          }
+          if (gatewayData.etc?.certifications && gatewayData.etc.certifications.length > 0) {
+            data.value.etc = { certifications: gatewayData.etc.certifications }
+          }
+          if (gatewayData.footer) data.value.footer = { ...data.value.footer, ...gatewayData.footer }
+
+          source.value = 'supabase'
+          return
+        }
+      } catch {
+        // WAS 게이트웨이 조회 불가 시 안전하게 fallback 유지
+      } finally {
+        loading.value = false
+      }
       source.value = 'fallback'
       return
     }
-
-    loading.value = true
-    error.value = null
 
     try {
       const queryTable = (table: string, isSingle: boolean) => {
