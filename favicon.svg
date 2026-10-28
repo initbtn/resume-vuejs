@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="codeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#34d399" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#38bdf8" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  <!-- Background Rounded Card -->
+  <rect width="128" height="128" rx="28" fill="url(#bgGrad)" stroke="#334155" stroke-width="3" />
+  
+  <!-- Subtle Inner Border Highlight -->
+  <rect x="4" y="4" width="120" height="120" rx="24" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-opacity="0.4" />
+
+  <!-- Code Monogram < / > -->
+  <g filter="url(#glow)" stroke="url(#codeGrad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Left bracket < -->
+    <path d="M 44 46 L 26 64 L 44 82" />
+    <!-- Slash / -->
+    <path d="M 72 40 L 56 88" stroke-width="9" />
+    <!-- Right bracket > -->
+    <path d="M 84 46 L 102 64 L 84 82" />
+  </g>
+</svg>
