@@ -31,10 +31,7 @@ jobs:
       - name: Run Type Check (TypeScript)
         run: npm run type-check
 
-      - name: Build Production Assets
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      - name: Build Production Assets (Zero Client DB Secrets)
         run: npm run build
 
       - name: Deploy to GitHub Pages

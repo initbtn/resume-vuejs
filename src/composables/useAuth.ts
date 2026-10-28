@@ -1,7 +1,10 @@
 import { ref, computed } from 'vue'
 import type { Ref, ComputedRef } from 'vue'
 import type { User, Session, AuthError } from '@supabase/supabase-js'
-import { supabase, type TypedSupabaseClient } from '../lib/supabase'
+import type { TypedSupabaseClient } from '../lib/supabase'
+import { authGatewayRequest } from '../lib/apiClient'
+
+const TOKEN_STORAGE_KEY = 'resume_admin_token'
 
 export interface UseAuthOptions {
   client?: TypedSupabaseClient | null
@@ -28,7 +31,7 @@ export interface UseAuthReturn {
 }
 
 export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
-  const client = options.client !== undefined ? options.client : supabase
+  const client = options.client !== undefined ? options.client : null
   const autoInitialize = options.autoInitialize ?? true
 
   const user = ref<User | null>(null)
@@ -40,6 +43,25 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
 
   const initialize = async () => {
     if (!client) {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const storedToken = window.localStorage.getItem(TOKEN_STORAGE_KEY)
+        if (storedToken) {
+          try {
+            loading.value = true
+            const res = await authGatewayRequest('getUser', { token: storedToken })
+            if (res.success && res.user) {
+              user.value = res.user
+              session.value = { access_token: storedToken, user: res.user } as any
+            } else {
+              window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+            }
+          } catch {
+            window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+          } finally {
+            loading.value = false
+          }
+        }
+      }
       return
     }
 
@@ -77,9 +99,32 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
     }
 
     if (!client) {
-      const clientError = new Error('Supabase 클라이언트가 초기화되지 않았습니다.')
-      error.value = clientError
-      return { success: false, error: clientError }
+      if (typeof fetch === 'undefined') {
+        const clientError = new Error('Supabase 클라이언트가 초기화되지 않았습니다.')
+        error.value = clientError
+        return { success: false, error: clientError }
+      }
+      try {
+        loading.value = true
+        const res = await authGatewayRequest('login', { email: email.trim(), password: password.trim() })
+        if (!res.success) {
+          const err = new Error(res.error || '인증에 실패했습니다.')
+          error.value = err
+          return { success: false, error: err }
+        }
+        user.value = res.user
+        session.value = res.session
+        if (typeof window !== 'undefined' && window.localStorage && res.session?.access_token) {
+          window.localStorage.setItem(TOKEN_STORAGE_KEY, res.session.access_token)
+        }
+        return { success: true, user: res.user, session: res.session }
+      } catch (err: any) {
+        const handledError = err instanceof Error ? err : new Error(String(err))
+        error.value = handledError
+        return { success: false, error: handledError }
+      } finally {
+        loading.value = false
+      }
     }
 
     try {
@@ -115,15 +160,28 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
   }
 
   const signOut = async (): Promise<void> => {
-    if (!client) {
-      user.value = null
-      session.value = null
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+    }
+
+    if (client) {
+      try {
+        loading.value = true
+        await client.auth.signOut()
+        user.value = null
+        session.value = null
+        error.value = null
+      } catch (err: any) {
+        error.value = err instanceof Error ? err : new Error(String(err))
+      } finally {
+        loading.value = false
+      }
       return
     }
 
     try {
       loading.value = true
-      await client.auth.signOut()
+      await authGatewayRequest('logout')
       user.value = null
       session.value = null
       error.value = null
@@ -134,7 +192,7 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
     }
   }
 
-  if (autoInitialize && client) {
+  if (autoInitialize) {
     initialize()
   }
 

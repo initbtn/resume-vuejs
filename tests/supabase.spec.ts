@@ -169,7 +169,7 @@ describe('Supabase Client & Composable (Milestone 2 - Issue #4)', () => {
   })
 
   describe('Frontend Supabase Integration & 8 Domains Fetching (Milestone 2 - Issue #14)', () => {
-    it('deploy.yml 워크플로의 빌드 스텝에 VITE_SUPABASE_URL 및 VITE_SUPABASE_ANON_KEY가 주입되어야 한다', async () => {
+    it('deploy.yml 워크플로의 빌드 스텝에 클라이언트 DB 자격증명(VITE_SUPABASE_*)이 노출되지 않아야 한다 (Issue #50 아키텍처 보안 규율)', async () => {
       const fs = await import('fs')
       const path = await import('path')
 
@@ -177,8 +177,8 @@ describe('Supabase Client & Composable (Milestone 2 - Issue #4)', () => {
       expect(fs.existsSync(workflowFile)).toBe(true)
 
       const workflowContent = fs.readFileSync(workflowFile, 'utf-8')
-      expect(workflowContent).toContain('VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}')
-      expect(workflowContent).toContain('VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}')
+      expect(workflowContent).not.toContain('VITE_SUPABASE_URL:')
+      expect(workflowContent).not.toContain('VITE_SUPABASE_ANON_KEY:')
     })
 
     it('useResumeData 호출 시 8대 도메인 테이블 전체를 조회해야 한다', async () => {
