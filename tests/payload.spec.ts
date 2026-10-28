@@ -53,7 +53,7 @@ describe('Payload Domain Integrity & 5 Key KPIs', () => {
     expect(resumeVue).toBeDefined()
     expect(resumeVue?.period).toContain('2026')
     expect(resumeVue?.period).toContain('현재')
-    expect(resumeVue?.achievements.some((a) => a.includes('WAS API 게이트웨이'))).toBe(true)
+    expect(resumeVue?.achievements?.some((a) => a.includes('WAS API 게이트웨이'))).toBe(true)
 
     const byd = projects.find((p) => p.title.includes('busan-youth-day'))
     expect(byd).toBeDefined()
@@ -64,7 +64,7 @@ describe('Payload Domain Integrity & 5 Key KPIs', () => {
     expect(marineGis).toBeDefined()
     expect(marineGis?.period).toContain('2026.10')
     expect(marineGis?.link).toBe('https://github.com/initbtn/marine-sensor-gis')
-    expect(marineGis?.achievements.some((a) => a.includes('WAS 단일 게이트웨이'))).toBe(true)
+    expect(marineGis?.achievements?.some((a) => a.includes('WAS 단일 게이트웨이'))).toBe(true)
 
     const assist = projects.find((p) => p.title.includes('assist'))
     expect(assist).toBeDefined()
