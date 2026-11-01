@@ -191,8 +191,8 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
   })
 
   describe('Serverless Handlers Method, CORS and Auth Guards', () => {
-    it('resumeHandler should return 405 for POST request', async () => {
-      const req: any = { method: 'POST', headers: {} }
+    it('resumeHandler should return 405 for POST request and allow HEAD request', async () => {
+      const postReq: any = { method: 'POST', headers: {} }
       let statusCode = 0
       let responseBody = ''
       const res: any = {
@@ -204,8 +204,9 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
         }
       }
 
-      await resumeHandler(req, res)
+      await resumeHandler(postReq, res)
       expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Origin', '*')
+      expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
       expect(statusCode).toBe(405)
       expect(responseBody).toContain('Method Not Allowed')
     })

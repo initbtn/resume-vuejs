@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useResumeData } from './composables/useResumeData'
+import { initialResumePayload } from './constants/initialPayload'
 import { useAuth } from './composables/useAuth'
 import Profile from './components/profile/Profile.vue'
 import Introduce from './components/introduce/Introduce.vue'
@@ -14,7 +15,10 @@ import Footer from './components/footer/Footer.vue'
 import LoginModal from './components/admin/LoginModal.vue'
 import CmsModal from './components/admin/CmsModal.vue'
 
-const { data: resumeData, fetchData: fetchResumeData } = useResumeData({ autoFetch: true })
+const { data: resumeData, fetchData: fetchResumeData } = useResumeData({
+  autoFetch: true,
+  initialData: initialResumePayload
+})
 const { user, isAuthenticated, loading: authLoading, error: authError, signIn, signOut } = useAuth()
 
 const isLoginModalOpen = ref(false)

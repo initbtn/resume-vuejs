@@ -4,7 +4,7 @@ import type { Database } from '../src/types/database.types'
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   res.setHeader('Content-Type', 'application/json')
 
@@ -14,7 +14,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return
   }
 
-  if (req.method !== 'GET') {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.statusCode = 405
     res.end(JSON.stringify({ success: false, error: 'Method Not Allowed' }))
     return

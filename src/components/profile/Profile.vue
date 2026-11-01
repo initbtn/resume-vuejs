@@ -41,10 +41,6 @@ defineProps<{
               {{ payload.email }}
             </a>
           </div>
-          <div v-if="payload.phone" class="profile-contact-item flex items-center gap-1.5">
-            <span class="font-semibold text-gray-400">Phone:</span>
-            <span class="text-gray-700">{{ payload.phone }}</span>
-          </div>
           <div v-if="payload.github" class="profile-contact-item flex items-center gap-1.5">
             <span class="font-semibold text-gray-400">GitHub:</span>
             <a :href="payload.github" target="_blank" rel="noreferrer" class="hover:underline text-blue-600 break-all">
