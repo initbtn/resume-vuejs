@@ -49,7 +49,6 @@ const profileForm = reactive({
   name: '',
   position: '',
   email: '',
-  phone: '',
   github: '',
   blog: '',
   location: ''
@@ -79,7 +78,6 @@ watch(
       profileForm.name = newData.profile.name || ''
       profileForm.position = newData.profile.position || ''
       profileForm.email = newData.profile.email || ''
-      profileForm.phone = newData.profile.phone || ''
       profileForm.github = newData.profile.github || ''
       profileForm.blog = newData.profile.blog || ''
       profileForm.location = newData.profile.location || ''
@@ -360,10 +358,6 @@ const handleSaveFooter = async () => {
             <div>
               <label class="block text-xs font-semibold text-gray-700 mb-1">이메일</label>
               <input v-model="profileForm.email" type="email" class="w-full px-3 py-2 border rounded-lg text-sm" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-700 mb-1">전화번호</label>
-              <input v-model="profileForm.phone" type="text" class="w-full px-3 py-2 border rounded-lg text-sm" />
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-700 mb-1">GitHub 링크</label>

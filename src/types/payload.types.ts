@@ -2,7 +2,7 @@ export interface IProfile {
   name: string
   position: string
   email: string
-  phone: string
+  phone?: string
   github: string
   location: string
   blog?: string | null
