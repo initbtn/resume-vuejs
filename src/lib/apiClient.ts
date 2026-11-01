@@ -1,4 +1,4 @@
-import type { PayloadType } from '../payload/types'
+import type { PayloadType } from '../types/payload.types'
 
 export interface GatewayResumeResponse {
   success: boolean

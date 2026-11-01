@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IFooter } from '../../payload/types'
+import type { IFooter } from '../../types/payload.types'
 
 defineProps<{
   payload: IFooter

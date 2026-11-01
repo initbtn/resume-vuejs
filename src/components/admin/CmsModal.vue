@@ -2,7 +2,7 @@
 import { ref, watch, reactive } from 'vue'
 import { useAdminCms } from '../../composables/useAdminCms'
 import CmsEditableList from './CmsEditableList.vue'
-import type { PayloadType } from '../../payload/types'
+import type { PayloadType } from '../../types/payload.types'
 
 interface Props {
   isOpen: boolean
@@ -51,6 +51,7 @@ const profileForm = reactive({
   email: '',
   phone: '',
   github: '',
+  blog: '',
   location: ''
 })
 
@@ -80,6 +81,7 @@ watch(
       profileForm.email = newData.profile.email || ''
       profileForm.phone = newData.profile.phone || ''
       profileForm.github = newData.profile.github || ''
+      profileForm.blog = newData.profile.blog || ''
       profileForm.location = newData.profile.location || ''
     }
     if (newData.introduce?.contents) {
@@ -366,6 +368,10 @@ const handleSaveFooter = async () => {
             <div>
               <label class="block text-xs font-semibold text-gray-700 mb-1">GitHub 링크</label>
               <input v-model="profileForm.github" type="text" class="w-full px-3 py-2 border rounded-lg text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1">블로그 링크</label>
+              <input v-model="profileForm.blog" type="text" class="w-full px-3 py-2 border rounded-lg text-sm" />
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-700 mb-1">거주 위치</label>

@@ -1,4 +1,4 @@
-import type { IFooter } from './types'
+import type { IFooter } from '../../src/types/payload.types'
 
 export const footer: IFooter = {
   sign: "Sung-Ho Nam",

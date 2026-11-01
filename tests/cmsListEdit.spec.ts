@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import CmsModal from '../src/components/admin/CmsModal.vue'
-import { Payload } from '../src/payload'
+import { Payload } from './fixtures'
 
 const api = vi.hoisted(() => {
   const ok = () => vi.fn().mockResolvedValue({ success: true })

@@ -5,6 +5,7 @@ export interface IProfile {
   phone: string
   github: string
   location: string
+  blog?: string | null
 }
 
 export interface IIntroduce {
@@ -114,3 +115,27 @@ export interface PayloadType {
   etc: IEtc
   footer: IFooter
 }
+
+export const createEmptyPayload = (): PayloadType => ({
+  profile: {
+    name: '',
+    position: '',
+    email: '',
+    phone: '',
+    github: '',
+    location: '',
+    blog: ''
+  },
+  introduce: { contents: [] },
+  highlight: { list: [] },
+  skill: { categories: [] },
+  experience: { list: [] },
+  project: { list: [] },
+  education: { list: [] },
+  etc: { certifications: [] },
+  footer: {
+    sign: '',
+    since: new Date().getFullYear(),
+    github: ''
+  }
+})

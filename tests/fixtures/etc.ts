@@ -1,4 +1,4 @@
-import type { IEtc } from './types'
+import type { IEtc } from '../../src/types/payload.types'
 
 export const etc: IEtc = {
   certifications: [

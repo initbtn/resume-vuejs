@@ -1,4 +1,4 @@
-import type { IHighlight } from './types'
+import type { IHighlight } from '../../src/types/payload.types'
 
 export const highlight: IHighlight = {
   list: [

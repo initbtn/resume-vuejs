@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CommonSection from '../common/CommonSection.vue'
 import CommonRow from '../common/CommonRow.vue'
-import type { IEducation } from '../../payload/types'
+import type { IEducation } from '../../types/payload.types'
 
 defineProps<{
   educationPayload: IEducation

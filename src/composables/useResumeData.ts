@@ -1,6 +1,5 @@
 import { ref, onMounted, type Ref } from 'vue'
-import type { PayloadType } from '../payload/types'
-import { Payload } from '../payload'
+import { type PayloadType, createEmptyPayload } from '../types/payload.types'
 import type { TypedSupabaseClient } from '../lib/supabase'
 import { fetchResumeFromGateway } from '../lib/apiClient'
 
@@ -14,30 +13,17 @@ export interface UseResumeDataReturn {
   data: Ref<PayloadType>
   loading: Ref<boolean>
   error: Ref<Error | null>
-  source: Ref<'supabase' | 'fallback'>
+  source: Ref<'supabase' | 'gateway' | 'empty'>
   fetchData: () => Promise<void>
 }
 
 export function useResumeData(options: UseResumeDataOptions = {}): UseResumeDataReturn {
   const activeClient = options.client !== undefined ? options.client : null
 
-  // 깊은 복사로 초기 로컬 fallback 데이터 생성
-  const initialData: PayloadType = {
-    profile: { ...Payload.profile },
-    introduce: { ...Payload.introduce },
-    highlight: { ...Payload.highlight },
-    skill: { ...Payload.skill },
-    experience: { ...Payload.experience },
-    project: { ...Payload.project },
-    education: { ...Payload.education },
-    etc: { ...Payload.etc },
-    footer: { ...Payload.footer }
-  }
-
-  const data = ref<PayloadType>(initialData)
+  const data = ref<PayloadType>(createEmptyPayload())
   const loading = ref<boolean>(false)
   const error = ref<Error | null>(null)
-  const source = ref<'supabase' | 'fallback'>('fallback')
+  const source = ref<'supabase' | 'gateway' | 'empty'>('empty')
 
   const fetchData = async (): Promise<void> => {
     loading.value = true
@@ -48,38 +34,37 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
         const gatewayData = await fetchResumeFromGateway(options.apiUrl || '/api/resume')
         if (gatewayData) {
           if (gatewayData.profile) data.value.profile = { ...data.value.profile, ...gatewayData.profile }
-          if (gatewayData.introduce?.contents && gatewayData.introduce.contents.length > 0) {
+          if (gatewayData.introduce?.contents) {
             data.value.introduce = { contents: gatewayData.introduce.contents }
           }
-          if (gatewayData.highlight?.list && gatewayData.highlight.list.length > 0) {
+          if (gatewayData.highlight?.list) {
             data.value.highlight = { list: gatewayData.highlight.list }
           }
-          if (gatewayData.skill?.categories && gatewayData.skill.categories.length > 0) {
+          if (gatewayData.skill?.categories) {
             data.value.skill = { categories: gatewayData.skill.categories }
           }
-          if (gatewayData.experience?.list && gatewayData.experience.list.length > 0) {
+          if (gatewayData.experience?.list) {
             data.value.experience = { list: gatewayData.experience.list }
           }
-          if (gatewayData.project?.list && gatewayData.project.list.length > 0) {
+          if (gatewayData.project?.list) {
             data.value.project = { list: gatewayData.project.list }
           }
-          if (gatewayData.education?.list && gatewayData.education.list.length > 0) {
+          if (gatewayData.education?.list) {
             data.value.education = { list: gatewayData.education.list }
           }
-          if (gatewayData.etc?.certifications && gatewayData.etc.certifications.length > 0) {
+          if (gatewayData.etc?.certifications) {
             data.value.etc = { certifications: gatewayData.etc.certifications }
           }
           if (gatewayData.footer) data.value.footer = { ...data.value.footer, ...gatewayData.footer }
 
-          source.value = 'supabase'
+          source.value = 'gateway'
           return
         }
-      } catch {
-        // WAS 게이트웨이 조회 불가 시 안전하게 fallback 유지
+      } catch (err) {
+        error.value = err instanceof Error ? err : new Error(String(err))
       } finally {
         loading.value = false
       }
-      source.value = 'fallback'
       return
     }
 
@@ -130,7 +115,6 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
 
       if (anyError) {
         error.value = anyError instanceof Error ? anyError : new Error(anyError.message || String(anyError))
-        source.value = 'fallback'
         return
       }
 
@@ -144,7 +128,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
         hasRemoteData = true
       }
 
-      if (introduceRes?.data?.contents && introduceRes.data.contents.length > 0) {
+      if (introduceRes?.data?.contents) {
         data.value.introduce = {
           contents: introduceRes.data.contents
         }
@@ -244,10 +228,11 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
         hasRemoteData = true
       }
 
-      source.value = hasRemoteData ? 'supabase' : 'fallback'
+      if (hasRemoteData) {
+        source.value = 'supabase'
+      }
     } catch (err) {
       error.value = err instanceof Error ? err : new Error(String(err))
-      source.value = 'fallback'
     } finally {
       loading.value = false
     }

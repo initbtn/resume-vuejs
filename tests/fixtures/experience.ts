@@ -1,4 +1,4 @@
-import type { IExperience } from './types'
+import type { IExperience } from '../../src/types/payload.types'
 
 export const experience: IExperience = {
   list: [

@@ -82,6 +82,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     email: string
     phone?: string
     github?: string
+    blog?: string
     location?: string
   }): Promise<CmsOperationResult> => {
     error.value = null
@@ -101,6 +102,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         email: payload.email.trim(),
         phone: payload.phone?.trim() || '',
         github: payload.github?.trim() || '',
+        blog: payload.blog?.trim() || null,
         location: payload.location?.trim() || '',
         updated_at: new Date().toISOString()
       }

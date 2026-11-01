@@ -1,4 +1,4 @@
-import type { IProfile } from './types'
+import type { IProfile } from '../../src/types/payload.types'
 
 export const profile: IProfile = {
   name: "남성호",

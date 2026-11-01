@@ -218,6 +218,7 @@ export type Database = {
       }
       profile: {
         Row: {
+          blog: string | null
           created_at: string
           email: string
           github: string
@@ -229,6 +230,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          blog?: string | null
           created_at?: string
           email: string
           github: string
@@ -240,6 +242,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          blog?: string | null
           created_at?: string
           email?: string
           github?: string

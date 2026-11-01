@@ -7,7 +7,7 @@ import { project } from './project'
 import { education } from './education'
 import { etc } from './etc'
 import { footer } from './footer'
-import type { PayloadType } from './types'
+import type { PayloadType } from '../../src/types/payload.types'
 
 export const Payload: PayloadType = {
   profile,
@@ -22,4 +22,4 @@ export const Payload: PayloadType = {
 }
 
 export default Payload
-export * from './types'
+export * from '../../src/types/payload.types'
