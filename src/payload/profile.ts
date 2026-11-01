@@ -6,5 +6,6 @@ export const profile: IProfile = {
   email: "min2spapa@gmail.com",
   phone: "010-9306-2211",
   github: "https://github.com/initbtn",
+  blog: "https://domlog.vercel.app",
   location: "부산광역시 사하구"
 };

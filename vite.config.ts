@@ -7,6 +7,7 @@ export default defineConfig({
   base: './',
   test: {
     globals: true,
-    environment: 'jsdom'
+    environment: 'jsdom',
+    exclude: ['**/.claude/**', '**/node_modules/**']
   }
 })

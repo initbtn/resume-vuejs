@@ -51,6 +51,12 @@ defineProps<{
               {{ payload.github }}
             </a>
           </div>
+          <div v-if="payload.blog" class="profile-contact-item flex items-center gap-1.5">
+            <span class="font-semibold text-gray-400">Blog:</span>
+            <a :href="payload.blog" target="_blank" rel="noreferrer" class="hover:underline text-blue-600 break-all">
+              {{ payload.blog }}
+            </a>
+          </div>
           <div v-if="payload.location" class="profile-contact-item flex items-center gap-1.5">
             <span class="font-semibold text-gray-400">Location:</span>
             <span class="text-gray-700">{{ payload.location }}</span>

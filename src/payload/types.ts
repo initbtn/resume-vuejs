@@ -5,6 +5,7 @@ export interface IProfile {
   phone: string
   github: string
   location: string
+  blog?: string
 }
 
 export interface IIntroduce {
