@@ -7,23 +7,31 @@ export interface UseResumeDataOptions {
   client?: TypedSupabaseClient | null
   apiUrl?: string
   autoFetch?: boolean
+  initialData?: PayloadType
 }
 
 export interface UseResumeDataReturn {
   data: Ref<PayloadType>
   loading: Ref<boolean>
   error: Ref<Error | null>
-  source: Ref<'supabase' | 'gateway' | 'empty'>
+  source: Ref<'supabase' | 'gateway' | 'empty' | 'initial'>
   fetchData: () => Promise<void>
 }
 
 export function useResumeData(options: UseResumeDataOptions = {}): UseResumeDataReturn {
   const activeClient = options.client !== undefined ? options.client : null
+  const hasCustomInitial = Boolean(options.initialData)
 
-  const data = ref<PayloadType>(createEmptyPayload())
+  const data = ref<PayloadType>(
+    options.initialData
+      ? JSON.parse(JSON.stringify(options.initialData))
+      : createEmptyPayload()
+  )
   const loading = ref<boolean>(false)
   const error = ref<Error | null>(null)
-  const source = ref<'supabase' | 'gateway' | 'empty'>('empty')
+  const source = ref<'supabase' | 'gateway' | 'empty' | 'initial'>(
+    hasCustomInitial ? 'initial' : 'empty'
+  )
 
   const fetchData = async (): Promise<void> => {
     loading.value = true
