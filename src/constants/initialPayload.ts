@@ -54,7 +54,7 @@ export const initialResumePayload: PayloadType = {
         id: 1,
         order_index: 1,
         category: 'Front-end',
-        items: ['React.js', 'JavaScript (ES6+)', 'HTML5/CSS3', 'TailwindCSS']
+        items: ['Vue.js 3', 'React.js', 'TypeScript', 'JavaScript (ES6+)', 'TailwindCSS', 'Vitest (TDD)', 'Playwright (E2E)']
       },
       {
         id: 2,
@@ -72,7 +72,13 @@ export const initialResumePayload: PayloadType = {
         id: 4,
         order_index: 4,
         category: 'Domain Knowledge',
-        items: ['결제/인증/보험 Open API 연동', '조선해양 도메인', '가스일반제조시설 안전관리(업무용대형연소기 제조시설 안전관리)']
+        items: [
+          '조선·해양 도메인 (선박 배관 CAD, Tribon, P&ID)',
+          '선주·선급 검사 규격 이해',
+          '결제/인증/보험 Open API 연동',
+          '가스일반제조시설 안전관리(CE / ISO 9001)',
+          'AI 에이전트 워크플로우 (Claude Code, Antigravity)'
+        ]
       }
     ]
   },
@@ -102,7 +108,7 @@ export const initialResumePayload: PayloadType = {
         id: 3,
         order_index: 3,
         institution: '영산대학교',
-        course: '법률학부 법학 전공 (학점 3.78 / 4.5)',
+        course: '법률학부 법학 전공 (학점 3.73 / 4.5)',
         period: '2006.02 ~ 2014.02'
       }
     ]
@@ -121,13 +127,13 @@ export const initialResumePayload: PayloadType = {
         order_index: 1,
         name: '일반제조시설안전관리자',
         issuer: '한국가스안전공사',
-        date: '2017.06'
+        date: '2016.10'
       },
       {
         id: 3,
         order_index: 1,
         name: '자동차운전면허 1종 보통',
-        issuer: '부산지방경찰청',
+        issuer: '경찰청',
         date: '2007.05'
       },
       {
