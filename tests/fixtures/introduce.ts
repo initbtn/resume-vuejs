@@ -1,4 +1,4 @@
-import type { IIntroduce } from './types'
+import type { IIntroduce } from '../../src/types/payload.types'
 
 export const introduce: IIntroduce = {
   contents: [

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { Payload } from '../src/payload/index'
-import type { PayloadType } from '../src/payload/types'
+import { Payload } from './fixtures/index'
+import type { PayloadType } from '../src/types/payload.types'
 
 describe('Payload Domain Integrity & 5 Key KPIs', () => {
   it('should conform to PayloadType interface structure', () => {

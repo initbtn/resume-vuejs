@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CommonSection from '../common/CommonSection.vue'
 import CommonRow from '../common/CommonRow.vue'
-import type { IEtc } from '../../payload/types'
+import type { IEtc } from '../../types/payload.types'
 
 defineProps<{
   etcPayload: IEtc

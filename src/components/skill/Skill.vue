@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CommonSection from '../common/CommonSection.vue'
 import CommonRow from '../common/CommonRow.vue'
-import type { ISkill } from '../../payload/types'
+import type { ISkill } from '../../types/payload.types'
 
 defineProps<{
   payload: ISkill

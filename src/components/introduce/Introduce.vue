@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CommonSection from '../common/CommonSection.vue'
-import type { IIntroduce } from '../../payload/types'
+import type { IIntroduce } from '../../types/payload.types'
 
 defineProps<{
   payload: IIntroduce

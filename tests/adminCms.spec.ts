@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 import { useAdminCms } from '../src/composables/useAdminCms'
 import CmsModal from '../src/components/admin/CmsModal.vue'
 import App from '../src/App.vue'
-import { Payload } from '../src/payload'
+import { Payload } from './fixtures'
 
 describe('Admin CMS Dashboard & 8 Domains CUD (Issue #16)', () => {
   beforeEach(() => {

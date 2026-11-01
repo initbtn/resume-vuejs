@@ -1,4 +1,4 @@
-import type { IEducation } from './types'
+import type { IEducation } from '../../src/types/payload.types'
 
 export const education: IEducation = {
   list: [

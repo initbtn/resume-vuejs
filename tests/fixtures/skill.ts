@@ -1,4 +1,4 @@
-import type { ISkill } from './types'
+import type { ISkill } from '../../src/types/payload.types'
 
 export const skill: ISkill = {
   categories: [

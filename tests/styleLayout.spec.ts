@@ -10,7 +10,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { Payload } from '../src/payload'
+import { Payload } from './fixtures'
 import CommonSection from '../src/components/common/CommonSection.vue'
 import CommonRow from '../src/components/common/CommonRow.vue'
 

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createSupabaseClient } from '../src/lib/supabase'
 import { useResumeData } from '../src/composables/useResumeData'
-import { Payload } from '../src/payload'
 
 describe('Supabase Client & Composable (Milestone 2 - Issue #4)', () => {
   beforeEach(() => {
@@ -26,22 +25,22 @@ describe('Supabase Client & Composable (Milestone 2 - Issue #4)', () => {
   })
 
   describe('useResumeData Composable & Fallback 무결성', () => {
-    it('클라이언트가 비활성화 상태일 때 기본 로컬 Payload로 fallback되어야 한다', async () => {
+    it('클라이언트가 비활성화 상태일 때 기본 빈 Payload 상태를 유지한다', async () => {
       const { data, loading, error, source, fetchData } = useResumeData({
         client: null
       })
 
-      expect(data.value.profile.name).toBe(Payload.profile.name)
-      expect(source.value).toBe('fallback')
+      expect(data.value.profile.name).toBe('')
+      expect(source.value).toBe('empty')
       expect(loading.value).toBe(false)
       expect(error.value).toBeNull()
 
       await fetchData()
-      expect(data.value.profile.name).toBe(Payload.profile.name)
-      expect(source.value).toBe('fallback')
+      expect(data.value.profile.name).toBe('')
+      expect(source.value).toBe('empty')
     })
 
-    it('Supabase 호출 시 에러가 발생해도 로컬 Payload로 안전하게 fallback되어야 한다', async () => {
+    it('Supabase 호출 시 에러가 발생하면 error에 기록하고 빈 상태를 유지한다', async () => {
       const mockClient = {
         from: vi.fn().mockReturnValue({
           select: vi.fn().mockResolvedValue({
@@ -57,8 +56,8 @@ describe('Supabase Client & Composable (Milestone 2 - Issue #4)', () => {
 
       await fetchData()
 
-      expect(data.value.profile.name).toBe(Payload.profile.name)
-      expect(source.value).toBe('fallback')
+      expect(data.value.profile.name).toBe('')
+      expect(source.value).toBe('empty')
       expect(error.value).not.toBeNull()
       expect(loading.value).toBe(false)
     })
@@ -237,8 +236,8 @@ describe('Supabase Client & Composable (Milestone 2 - Issue #4)', () => {
 
       await fetchData()
 
-      expect(data.value.skill.categories).toEqual(Payload.skill.categories)
-      expect(source.value).toBe('fallback')
+      expect(data.value.skill.categories).toEqual([])
+      expect(source.value).toBe('empty')
       expect(error.value).not.toBeNull()
       expect(error.value?.message).toContain('permission denied for table skill')
       expect(loading.value).toBe(false)

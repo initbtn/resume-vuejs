@@ -1,13 +1,9 @@
 <script setup lang="ts">
-import { Payload } from '../../payload'
-
 export interface HighlightCard {
   title: string
   description: string
   keywords: string[]
 }
-
-const defaultCards: HighlightCard[] = Payload.highlight.list
 
 defineProps<{
   cards?: HighlightCard[]
@@ -15,10 +11,10 @@ defineProps<{
 </script>
 
 <template>
-  <div class="editorial-section my-8" data-testid="highlight-card-grid">
+  <div v-if="cards && cards.length > 0" class="editorial-section my-8" data-testid="highlight-card-grid">
     <div class="card-grid-3">
       <div
-        v-for="card in (cards || defaultCards)"
+        v-for="card in cards"
         :key="card.title"
         class="highlight-card bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
         data-testid="highlight-card"
@@ -31,13 +27,13 @@ defineProps<{
             {{ card.description }}
           </p>
         </div>
-        <div class="highlight-keywords flex flex-wrap gap-1.5">
+        <div class="highlight-keywords flex flex-wrap gap-1.5 mt-auto pt-3 border-t border-gray-100">
           <span
-            v-for="tag in card.keywords"
-            :key="tag"
+            v-for="kw in card.keywords"
+            :key="kw"
             class="tag tag--accent px-2 py-0.5 text-xs font-medium rounded bg-blue-50 text-blue-700 border border-blue-100"
           >
-            {{ tag }}
+            {{ kw }}
           </span>
         </div>
       </div>

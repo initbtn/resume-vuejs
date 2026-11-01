@@ -75,7 +75,7 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
   })
 
   describe('useResumeData with WAS Gateway', () => {
-    it('client가 null일 때 WAS 게이트웨이 호출이 성공하면 source가 supabase가 되고 데이터가 반영되어야 한다', async () => {
+    it('client가 null일 때 WAS 게이트웨이 호출이 성공하면 source가 gateway가 되고 데이터가 반영되어야 한다', async () => {
       const mockGatewayData = {
         profile: { name: '게이트웨이홍길동', position: '엔지니어', email: 'gw@test.com' }
       }
@@ -88,17 +88,17 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
       await fetchData()
 
       expect(data.value.profile.name).toBe('게이트웨이홍길동')
-      expect(source.value).toBe('supabase')
+      expect(source.value).toBe('gateway')
       expect(loading.value).toBe(false)
     })
 
-    it('client가 null이고 게이트웨이 호출 실패 시 안전하게 fallback으로 유지되어야 한다', async () => {
+    it('client가 null이고 게이트웨이 호출 실패 시 안전하게 empty 상태로 유지되어야 한다', async () => {
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
 
       const { source, fetchData, loading } = useResumeData({ client: null })
       await fetchData()
 
-      expect(source.value).toBe('fallback')
+      expect(source.value).toBe('empty')
       expect(loading.value).toBe(false)
     })
   })

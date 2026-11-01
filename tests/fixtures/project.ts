@@ -1,4 +1,4 @@
-import type { IProject } from './types'
+import type { IProject } from '../../src/types/payload.types'
 
 export const project: IProject = {
   list: [
