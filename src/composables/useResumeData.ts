@@ -31,7 +31,7 @@ export function useResumeData(options: UseResumeDataOptions = {}): UseResumeData
 
     if (!activeClient) {
       try {
-        const gatewayData = await fetchResumeFromGateway(options.apiUrl || '/api/resume')
+        const gatewayData = await fetchResumeFromGateway(options.apiUrl)
         if (gatewayData) {
           if (gatewayData.profile) data.value.profile = { ...data.value.profile, ...gatewayData.profile }
           if (gatewayData.introduce?.contents) {
