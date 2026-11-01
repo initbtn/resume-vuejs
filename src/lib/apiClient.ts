@@ -19,11 +19,24 @@ export interface GatewayAuthResponse {
   error?: string
 }
 
-export async function fetchResumeFromGateway(apiUrl = '/api/resume'): Promise<Partial<PayloadType> | null> {
+export function getGatewayBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    // Vercel 자체 호스팅 또는 로컬 환경이면 상대 경로 사용
+    if (window.location.hostname === 'resume-vuejs.vercel.app' || window.location.hostname === 'localhost') {
+      return ''
+    }
+    // GitHub Pages 등 외부 정적 호스팅에서는 Vercel WAS 게이트웨이를 호출
+    return 'https://resume-vuejs.vercel.app'
+  }
+  return ''
+}
+
+export async function fetchResumeFromGateway(apiUrl?: string): Promise<Partial<PayloadType> | null> {
   if (typeof fetch === 'undefined') {
     return null
   }
-  const res = await fetch(apiUrl)
+  const endpoint = apiUrl || `${getGatewayBaseUrl()}/api/resume`
+  const res = await fetch(endpoint)
   if (!res.ok) {
     throw new Error(`WAS Gateway HTTP ${res.status}`)
   }
@@ -50,7 +63,8 @@ export async function sendCmsToGateway<T = any>(
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
     }
-    const res = await fetch('/api/cms', {
+    const endpoint = `${getGatewayBaseUrl()}/api/cms`
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers,
       body: JSON.stringify({ table, action, payload })
@@ -73,7 +87,8 @@ export async function authGatewayRequest(
     return { success: false, error: 'fetch is not available' }
   }
   try {
-    const res = await fetch('/api/auth', {
+    const endpoint = `${getGatewayBaseUrl()}/api/auth`
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, ...payload })
