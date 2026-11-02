@@ -6,7 +6,7 @@ INSERT INTO public.profile (id, name, position, email, phone, github, blog, loca
 VALUES (
   'default',
   '남성호',
-  'Front-end & Full-stack Engineer',
+  'Full-stack & Infrastructure Engineer',
   'min2spapa@gmail.com',
   '010-9306-2211',
   'https://github.com/initbtn',
@@ -27,9 +27,9 @@ INSERT INTO public.introduce (id, contents)
 VALUES (
   'default',
   ARRAY[
-    '비즈니스 프로세스의 병목을 소프트웨어와 데이터로 해결하는 4년 차 엔지니어입니다.',
-    '이종 대외 API 연동, 결제·인증 트랜잭션 무결성 보장, 대규모 정산 백오피스 UI 및 클라우드 인프라 구축을 주도하며 서비스 안정성과 운영 효율성을 극대화해 왔습니다.',
-    '선박 배관 설계(조선 도메인 2년) 경험과 비즈니스 운영 프로세스 혁신(7년)을 거쳐, 엔지니어링의 본질을 ''문제를 시스템으로 해결하는 것''으로 정의하고 주도적인 실행력을 발휘합니다.'
+    '비즈니스 프로세스의 병목과 시스템 안정성 문제를 엔지니어링으로 해결하는 4년 차 풀스택 & 인프라 엔지니어입니다.',
+    '인슈어트러스트 서비스 전반의 아키텍처 설계와 백엔드·DB 모델링, 무결성 트랜잭션, IaC 기반 인프라 보안 및 관제 파이프라인을 총괄해 왔습니다.',
+    '선박 배관 설계(조선 도메인 2년)와 제조·무역·안전관리 및 비즈니스 DX 총괄(7년)의 현장 실행력을 바탕으로, 엔지니어링의 본질을 ''문제를 견고한 시스템으로 해결하는 것''으로 정의합니다.'
   ]
 ) ON CONFLICT (id) DO UPDATE SET
   contents = EXCLUDED.contents,
@@ -48,64 +48,74 @@ TRUNCATE TABLE public.experience RESTART IDENTITY;
 INSERT INTO public.experience (company, position, period, description, projects, order_index) VALUES
 (
   '(주)리트러스트',
-  '개발팀 / 프로 (Front-end & Cloud Engineer)',
+  '개발팀 / 프로 (Full-stack & DevOps / Cloud Engineer)',
   '2023.10 ~ 현재',
-  '여행자 금융·보험 플랫폼 B2C/B2B 서비스 및 클라우드 인프라 엔드투엔드 개발·운영',
+  '금융·보험 플랫폼 ''인슈어트러스트'' 서비스 전반의 아키텍처 설계, 백엔드/DB 모델링, 인프라 보안 및 고객 접점(CRM) 총괄 운영',
   '[
     {
-      "title": "여행자 보험 서비스 핵심 트랜잭션 및 대외 API 연동 개발",
-      "period": "2024.04 ~ 2025.03",
-      "role": "프론트엔드 클라이언트 개발 및 트랜잭션 예외 처리",
+      "title": "인슈어트러스트 서비스 전반 아키텍처 설계 및 인프라·보안 운영",
+      "period": "2023.10 ~ 현재",
+      "role": "서비스 아키텍처 설계, 백엔드/DB 모델링, 인프라 보안 총괄",
       "achievements": [
-        "결제·인증·보험 Open API 다중 비동기 연동 간 이중 요청 방지 및 에러 복구 UI를 구현하여 중복 결제 오류 0% 달성",
-        "대외 API 12건 연동 및 핵심 트랜잭션 안정화로 누적 가입자 2,653건 확보 (전년 대비 5배 성장)",
-        "백오피스 내 메시지 템플릿 관리 UI를 자체 구축하여 CS 처리 리드타임을 2시간에서 5분으로 95% 단축",
-        "구글챗 웹훅 기반 실시간 에러 모니터링 파이프라인을 구축해 장애 인지 시간을 수십 분~수 시간에서 1초 이내(실시간)로 단축",
-        "에러 로그 파라미터 기반 원인 파악 체계를 마련해 장애 대응 리드타임을 평균 15분 이내로 약 80% 이상 단축"
+        "결제·본인인증·보험 Open API 다중 연동 간 분산 트랜잭션 예외 처리 및 멱등성 보장 로직을 설계하여 중복 결제 오류 0% 달성",
+        "대외 금융·보험 API 12건 연동 및 핵심 트랜잭션 안정화로 서비스 누적 가입자 2,653건 확보",
+        "청약·정산 핵심 도메인 관계형 DB 스키마 설계 및 인덱스 최적화, 개인정보(PII) 등 민감 데이터 암호화 및 최소 권한 접근 제어 체계 수립",
+        "코드 기반 인프라(IaC) 파이프라인 구축을 통한 서비스 환경 프로비저닝 자동화 및 네트워크 보안 경계 강화로 무인가 접근 원천 차단",
+        "분산 서비스 통합 로그 파이프라인 및 실시간 웹훅 모니터링 체계를 구축해 장애 인지 시간을 수십 분~수 시간에서 1초 이내(실시간)로 단축",
+        "에러 로그 파라미터 기반 원인 분석 체계로 장애 대응 리드타임을 평균 15분 이내로 약 80% 이상 단축"
       ],
-      "skills": ["React.js", "REST API", "Axios", "PG Gateway", "AWS", "Nginx", "Docker"]
+      "skills": ["System Architecture", "RDBMS Design", "REST API", "Zero Trust", "IaC (Terraform/Ansible)", "Logging & Monitoring"]
     },
     {
-      "title": "B2B 파트너 정산 포털 및 통합 백오피스 어드민 플랫폼 개발",
-      "period": "2024.08 ~ 2025.01",
-      "role": "프론트엔드 전담 (기여도 100%)",
+      "title": "고객 상담 경험(CRM) 혁신 및 운영 지원 시스템 총괄",
+      "period": "2024.04 ~ 현재",
+      "role": "CRM 총괄, 상담 프로세스 디지털 전환 및 자동화",
       "achievements": [
-        "수천 건의 청약/정산 데이터를 조건별로 지연 없이 조회하는 고성능 데이터 테이블 및 다차원 필터링 UI 구현",
-        "B2B 파트너사 및 사내 관리자 등 사용자 권한별 접근 제어를 위한 Role-based 라우팅 및 조건부 메뉴 렌더링 처리",
-        "월별 거래 추이 및 정산 현황 등 핵심 비즈니스 KPI를 시각화하는 차트 대시보드 컴포넌트 개발"
+        "제조/유통 현장에서 축적한 고객 접점 자동화 및 프로세스 혁신 역량을 결합하여 CS 처리 리드타임을 2시간에서 5분으로 95% 단축",
+        "고객 문의 패턴 데이터 분석 기반 맞춤형 챗봇 응대 시나리오를 설계하여 단순 반복 문의 자동 처리율 극대화 및 상담 품질 표준화 달성"
       ],
-      "skills": ["React.js", "REST API", "Chart.js", "CSS Module", "JavaScript"]
-    },
-    {
-      "title": "인슈어트러스트 제로트러스트 기반 멀티클라우드 MSA & IaC 리팩토링",
-      "period": "2026.01 ~ 2026.03",
-      "role": "인프라 & DevOps 총괄",
-      "achievements": [
-        "외부 노출 공용 자산 수 70% 감소 및 서버 직접 SSH 접근 100% 제거 (Bastion 호스트 경유 필수화)",
-        "Terraform 및 Ansible 기반 IaC 파이프라인 구축으로 신규 환경 구축 소요 시간 1일에서 1시간으로 단축 (95% 단축)",
-        "Promtail-Loki 기반 통합 로그 파이프라인 구축으로 로그 수집 커버리지 100% 달성"
-      ],
-      "skills": ["AWS", "Linode", "Terraform", "Ansible", "Docker-compose", "Loki", "Promtail"]
+      "skills": ["CRM Operation", "Chatbot Design", "Customer Experience (CX)", "Process Innovation"]
     }
   ]'::jsonb,
   1
 ),
 (
   '(주)케이투시스템이엔지',
-  '총무/과장 (CS 총괄, 안전관리, 프로세스 혁신)',
+  '총무/과장 (가스용품제조시설 안전관리총괄자, DX 및 해외무역 총괄)',
   '2016.04 ~ 2023.01',
-  '비즈니스 프로세스 데이터화, 고객 접점 디지털 전환 및 법정 안전관리 총괄',
+  '비즈니스 프로세스 디지털 전환(DX), 법정 안전관리총괄(품질/인증/검사) 및 해외 무역 실무 총괄',
   '[
     {
-      "title": "고객 서비스 프로세스 개선 및 상담 자동화 시스템 구축",
-      "period": "2021.05 ~ 2022.12",
-      "role": "프로세스 혁신 기획 및 자동화 툴 제작",
+      "title": "비즈니스 프로세스 데이터화 및 고객 접점 디지털 전환 (DX)",
+      "period": "2019.01 ~ 2023.01",
+      "role": "디지털 전환(DX) 기획 및 프로세스 자동화 총괄",
       "achievements": [
+        "채널톡 도입 및 고객 상담 패턴 데이터 분석 기반 챗봇 시나리오 설계로 대기시간 단축 및 응대 품질 표준화",
         "엑셀 참조 함수 기반 검사 신청 자동화 테이블 구축으로 수기 작업 공수 대폭 절감",
-        "채널톡 도입 및 상담 패턴 분석을 통한 챗봇 자동응대 시나리오 설계로 대기시간 단축 및 응대 품질 표준화",
-        "재코팅 서비스 프로세스 재설계(선출고-후반납)로 월 거래량 10건에서 400건(40배) 확장 달성"
+        "재코팅 서비스 프로세스 재설계(선출고-후반납)로 월 거래량 10건에서 400건(40배) 확장 달성",
+        "자사 웹사이트 기획·운영 및 디지털 제품 등록 관리 체계 수립"
       ],
-      "skills": ["Business Analysis", "Chatbot Design", "Excel Automation", "Process Innovation"]
+      "skills": ["Digital Transformation", "Process Innovation", "Chatbot Design", "Excel Automation", "Web Management"]
+    },
+    {
+      "title": "가스용품제조시설 법정 안전관리총괄 및 품질·인증 관리",
+      "period": "2016.10 ~ 2023.01",
+      "role": "안전관리총괄자 (한국가스안전공사 법정 선임)",
+      "achievements": [
+        "일반시설안전관리자 자격 기반 가스안전공사 가스용품제조시설 안전관리총괄자로 선임되어 퇴사 시까지 법정 안전교육 및 안전관리 전담",
+        "가스용품 제조시설 품질관리 체계 운영, 신규 제품설계 인증 및 상시제품검사 수검 전 과정 총괄"
+      ],
+      "skills": ["Facility Safety Management", "Quality Assurance", "Design Certification", "Statutory Safety Training"]
+    },
+    {
+      "title": "해외 무역 실무, 글로벌 바이어 상담 및 해외 전시회 총괄",
+      "period": "2018.03 ~ 2023.01",
+      "role": "해외 무역 및 전시회 총괄 기획",
+      "achievements": [
+        "해외 전시회 부스 기획, 현장 바이어 미팅 및 수출 상담 총괄",
+        "원산지 인증 및 통관·선적 등 무역사무 전반 주도로 2022년 연간 수출액 7만 불 달성"
+      ],
+      "skills": ["Global Trade", "Buyer Consultation", "Exhibition Planning", "Certificate of Origin"]
     }
   ]'::jsonb,
   2
@@ -218,7 +228,7 @@ INSERT INTO public.education (institution, course, period, order_index) VALUES
 TRUNCATE TABLE public.etc RESTART IDENTITY;
 INSERT INTO public.etc (name, issuer, date, order_index) VALUES
 ('정보처리기사', '한국산업인력공단', '2024.06', 1),
-('일반제조시설안전관리자', '한국가스안전공사', '2017.06', 2),
+('일반시설안전관리자', '한국가스안전공사', '2016.10', 2),
 ('자동차운전면허 1종 보통', '부산지방경찰청', '2007.05', 3),
 ('워드프로세서 3급', '대한상공회의소', '1999.08', 4);
 

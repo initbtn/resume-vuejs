@@ -10,7 +10,7 @@ import type { PayloadType } from '../types/payload.types'
 export const initialResumePayload: PayloadType = {
   profile: {
     name: '남성호',
-    position: 'Front-end & Full-stack Engineer',
+    position: 'Full-stack & Infrastructure Engineer',
     email: 'min2spapa@gmail.com',
     github: 'https://github.com/initbtn',
     location: '부산',
@@ -18,9 +18,9 @@ export const initialResumePayload: PayloadType = {
   },
   introduce: {
     contents: [
-      '비즈니스 프로세스의 병목을 소프트웨어와 데이터로 해결하는 4년 차 엔지니어입니다.',
-      '이종 대외 API 연동, 결제·인증 트랜잭션 무결성 보장, 대규모 정산 백오피스 UI 및 클라우드 인프라 구축을 주도하며 서비스 안정성과 운영 효율성을 극대화해 왔습니다.',
-      '선박 배관 설계(조선 도메인 2년) 경험과 비즈니스 운영 프로세스 혁신(7년)을 거쳐, 엔지니어링의 본질을 \'문제를 시스템으로 해결하는 것\'으로 정의하고 주도적인 실행력을 발휘합니다.'
+      '비즈니스 프로세스의 병목과 시스템 안정성 문제를 엔지니어링으로 해결하는 4년 차 풀스택 & 인프라 엔지니어입니다.',
+      '인슈어트러스트 서비스 전반의 아키텍처 설계와 백엔드·DB 모델링, 무결성 트랜잭션, IaC 기반 인프라 보안 및 관제 파이프라인을 총괄해 왔습니다.',
+      '선박 배관 설계(조선 도메인 2년)와 제조·무역·안전관리 및 비즈니스 DX 총괄(7년)의 현장 실행력을 바탕으로, 엔지니어링의 본질을 \'문제를 견고한 시스템으로 해결하는 것\'으로 정의합니다.'
     ]
   },
   highlight: {
@@ -75,8 +75,9 @@ export const initialResumePayload: PayloadType = {
         items: [
           '조선·해양 도메인 (선박 배관 CAD, Tribon, P&ID)',
           '선주·선급 검사 규격 이해',
-          '결제/인증/보험 Open API 연동',
-          '가스일반제조시설 안전관리(CE / ISO 9001)',
+          '결제/인증/보험 Open API 연동 및 트랜잭션 무결성',
+          '가스용품제조시설 법정 안전관리 (한국가스안전공사)',
+          '해외 무역 실무 및 글로벌 바이어 상담',
           'AI 에이전트 워크플로우 (Claude Code, Antigravity)'
         ]
       }
@@ -124,8 +125,8 @@ export const initialResumePayload: PayloadType = {
       },
       {
         id: 2,
-        order_index: 1,
-        name: '일반제조시설안전관리자',
+        order_index: 2,
+        name: '일반시설안전관리자',
         issuer: '한국가스안전공사',
         date: '2016.10'
       },
