@@ -29,9 +29,9 @@ export const project: IProject = {
       link: "https://github.com/initbtn/busan-youth-day"
     },
     {
-      title: "파나시아(PANASIA) 친환경 설비 실시간 센서 모니터링 & 해양 GIS 원격 위성관제 플랫폼 (marine-sensor-gis)",
+      title: "해양 친환경 설비 실시간 센서 모니터링 & 해양 GIS 원격 위성관제 플랫폼 (marine-sensor-gis)",
       period: "2026.10 ~ 현재",
-      where: "파나시아 친환경 설비 원격관제 (개인 개발)",
+      where: "해양 친환경 설비 원격관제 (개인 개발)",
       description: "선박 탈황 스크러버(PaSOx)·평형수(GloEn-Patrol)·탄소포집(PaCCUS) 실시간 10Hz 센서 원격 감시 및 해양 GIS 위성 관제 SPA 플랫폼 (Vercel 배포)",
       achievements: [
         "부산항~대한해협(TSS) 서수로 실제 해상 항로 데드레커닝 항행 엔진 및 IEC 62288 침로 벡터/16방위 나침반 툴팁 연동",
