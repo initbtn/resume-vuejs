@@ -8,26 +8,31 @@ import { Payload } from './fixtures'
 describe('Admin CMS Dashboard & 8 Domains CUD (Issue #16)', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.clear()
+    }
   })
 
   describe('useAdminCms Composable', () => {
     it('초기 상태에서는 loading이 false이고 error가 null이어야 한다', () => {
-      const { loading, error } = useAdminCms({ client: null })
+      const { loading, error } = useAdminCms()
       expect(loading.value).toBe(false)
       expect(error.value).toBeNull()
     })
 
     it('정상값: updateProfile 호출 시 profile 테이블 upsert 및 refetch가 호출되어야 한다', async () => {
       const refetchMock = vi.fn().mockResolvedValue(undefined)
-      const mockUpsert = vi.fn().mockResolvedValue({ data: null, error: null })
-      const mockClient = {
-        from: vi.fn().mockReturnValue({
-          upsert: mockUpsert
-        })
-      } as any
+      let requestBody: any = null
+
+      global.fetch = vi.fn().mockImplementation(async (_url, init) => {
+        requestBody = JSON.parse(init.body)
+        return {
+          ok: true,
+          json: async () => ({ success: true, data: { id: 'default' } })
+        }
+      })
 
       const { updateProfile, error, loading } = useAdminCms({
-        client: mockClient,
         onSuccess: refetchMock
       })
 
@@ -43,28 +48,28 @@ describe('Admin CMS Dashboard & 8 Domains CUD (Issue #16)', () => {
       const result = await updateProfile(profilePayload)
 
       expect(result.success).toBe(true)
-      expect(mockClient.from).toHaveBeenCalledWith('profile')
-      expect(mockUpsert).toHaveBeenCalledWith(
-        expect.objectContaining({
+      expect(requestBody).toEqual({
+        table: 'profile',
+        action: 'upsert',
+        payload: expect.objectContaining({
           id: 'default',
           name: '홍길동',
           position: 'Senior Engineer'
         })
-      )
+      })
       expect(refetchMock).toHaveBeenCalled()
       expect(error.value).toBeNull()
       expect(loading.value).toBe(false)
     })
 
-    it('완전히 틀린 값: Supabase 호출 에러 시 실패를 반환하고 error ref에 기록되어야 한다', async () => {
-      const dbError = { message: 'permission denied for table profile', code: '42501' }
-      const mockClient = {
-        from: vi.fn().mockReturnValue({
-          upsert: vi.fn().mockResolvedValue({ data: null, error: dbError })
-        })
-      } as any
+    it('완전히 틀린 값: 게이트웨이 호출 에러 시 실패를 반환하고 error ref에 기록되어야 한다', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 403,
+        json: async () => ({ success: false, error: 'permission denied for table profile' })
+      })
 
-      const { updateProfile, error } = useAdminCms({ client: mockClient })
+      const { updateProfile, error } = useAdminCms()
 
       const result = await updateProfile({
         name: '실패테스트',
@@ -81,8 +86,9 @@ describe('Admin CMS Dashboard & 8 Domains CUD (Issue #16)', () => {
     })
 
     it('일부만 맞는 값: 필수 필드 누락 시 유효성 검사에서 조기 실패(fail-fast)해야 한다', async () => {
-      const mockClient = { from: vi.fn() } as any
-      const { updateProfile, error } = useAdminCms({ client: mockClient })
+      const fetchSpy = vi.fn()
+      global.fetch = fetchSpy
+      const { updateProfile, error } = useAdminCms()
 
       const result = await updateProfile({
         name: '',
@@ -95,29 +101,22 @@ describe('Admin CMS Dashboard & 8 Domains CUD (Issue #16)', () => {
 
       expect(result.success).toBe(false)
       expect(error.value?.message).toContain('필수 항목을 모두 입력해주세요')
-      expect(mockClient.from).not.toHaveBeenCalled()
+      expect(fetchSpy).not.toHaveBeenCalled()
     })
 
     it('8대 도메인 CUD: experience 테이블 항목 추가/수정 및 삭제가 정상 동작해야 한다', async () => {
       const refetchMock = vi.fn().mockResolvedValue(undefined)
-      const mockUpsert = vi.fn().mockResolvedValue({ data: null, error: null })
-      const mockDeleteEq = vi.fn().mockResolvedValue({ data: null, error: null })
-      const mockDelete = vi.fn().mockReturnValue({ eq: mockDeleteEq })
+      const bodies: any[] = []
 
-      const mockClient = {
-        from: vi.fn().mockImplementation((table: string) => {
-          if (table === 'experience') {
-            return {
-              upsert: mockUpsert,
-              delete: mockDelete
-            }
-          }
-          return {}
-        })
-      } as any
+      global.fetch = vi.fn().mockImplementation(async (_url, init) => {
+        bodies.push(JSON.parse(init.body))
+        return {
+          ok: true,
+          json: async () => ({ success: true, data: { id: 42 } })
+        }
+      })
 
       const { saveExperience, deleteExperience } = useAdminCms({
-        client: mockClient,
         onSuccess: refetchMock
       })
 
@@ -130,31 +129,36 @@ describe('Admin CMS Dashboard & 8 Domains CUD (Issue #16)', () => {
         projects: []
       })
       expect(saveRes.success).toBe(true)
-      expect(mockUpsert).toHaveBeenCalled()
+      expect(bodies[0]).toEqual({
+        table: 'experience',
+        action: 'upsert',
+        payload: expect.objectContaining({ company: '테스트 컴퍼니' })
+      })
 
       // 2. Delete
       const delRes = await deleteExperience(42)
       expect(delRes.success).toBe(true)
-      expect(mockDelete).toHaveBeenCalled()
-      expect(mockDeleteEq).toHaveBeenCalledWith('id', 42)
+      expect(bodies[1]).toEqual({
+        table: 'experience',
+        action: 'delete',
+        payload: { id: 42 }
+      })
       expect(refetchMock).toHaveBeenCalledTimes(2)
     })
 
     it('정본 스키마 일치: education 및 etc 테이블의 실제 컬럼(institution, course, name, issuer)으로 CUD가 호출되어야 한다', async () => {
       const refetchMock = vi.fn().mockResolvedValue(undefined)
-      const mockEduUpsert = vi.fn().mockResolvedValue({ data: null, error: null })
-      const mockEtcUpsert = vi.fn().mockResolvedValue({ data: null, error: null })
+      const bodies: any[] = []
 
-      const mockClient = {
-        from: vi.fn().mockImplementation((table: string) => {
-          if (table === 'education') return { upsert: mockEduUpsert }
-          if (table === 'etc') return { upsert: mockEtcUpsert }
-          return {}
-        })
-      } as any
+      global.fetch = vi.fn().mockImplementation(async (_url, init) => {
+        bodies.push(JSON.parse(init.body))
+        return {
+          ok: true,
+          json: async () => ({ success: true, data: {} })
+        }
+      })
 
       const { saveEducation, saveEtc } = useAdminCms({
-        client: mockClient,
         onSuccess: refetchMock
       })
 
@@ -165,7 +169,7 @@ describe('Admin CMS Dashboard & 8 Domains CUD (Issue #16)', () => {
         period: '2016.03 - 2020.02'
       })
       expect(eduRes.success).toBe(true)
-      expect(mockEduUpsert).toHaveBeenCalledWith(
+      expect(bodies[0].payload).toEqual(
         expect.objectContaining({
           institution: '서울대학교',
           course: '컴퓨터공학과 학사',
@@ -180,7 +184,7 @@ describe('Admin CMS Dashboard & 8 Domains CUD (Issue #16)', () => {
         date: '2021.06'
       })
       expect(etcRes.success).toBe(true)
-      expect(mockEtcUpsert).toHaveBeenCalledWith(
+      expect(bodies[1].payload).toEqual(
         expect.objectContaining({
           name: '정보처리기사',
           issuer: '한국산업인력공단',

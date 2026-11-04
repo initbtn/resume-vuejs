@@ -75,7 +75,7 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
   })
 
   describe('useResumeData with WAS Gateway', () => {
-    it('client가 null일 때 WAS 게이트웨이 호출이 성공하면 source가 gateway가 되고 데이터가 반영되어야 한다', async () => {
+    it('WAS 게이트웨이 호출이 성공하면 source가 gateway가 되고 데이터가 반영되어야 한다', async () => {
       const mockGatewayData = {
         profile: { name: '게이트웨이홍길동', position: '엔지니어', email: 'gw@test.com' }
       }
@@ -84,7 +84,7 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
         json: async () => ({ success: true, data: mockGatewayData })
       } as any)
 
-      const { data, source, fetchData, loading } = useResumeData({ client: null })
+      const { data, source, fetchData, loading } = useResumeData()
       await fetchData()
 
       expect(data.value.profile.name).toBe('게이트웨이홍길동')
@@ -92,10 +92,10 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
       expect(loading.value).toBe(false)
     })
 
-    it('client가 null이고 게이트웨이 호출 실패 시 안전하게 empty 상태로 유지되어야 한다', async () => {
+    it('게이트웨이 호출 실패 시 안전하게 empty 상태로 유지되어야 한다', async () => {
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
 
-      const { source, fetchData, loading } = useResumeData({ client: null })
+      const { source, fetchData, loading } = useResumeData()
       await fetchData()
 
       expect(source.value).toBe('empty')
@@ -104,13 +104,13 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
   })
 
   describe('useAdminCms with WAS Gateway and Bearer Token', () => {
-    it('client가 null일 때 updateProfile이 WAS 게이트웨이를 경유하여 호출되고 토큰이 전달되어야 한다', async () => {
+    it('updateProfile이 WAS 게이트웨이를 경유하여 호출되고 토큰이 전달되어야 한다', async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ success: true, data: { id: 'default' } })
       } as any)
 
-      const { updateProfile } = useAdminCms({ client: null, token: 'custom-admin-jwt' })
+      const { updateProfile } = useAdminCms({ token: 'custom-admin-jwt' })
       const res = await updateProfile({
         name: '게이트웨이수정',
         position: 'Architect',
@@ -137,7 +137,7 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
         json: async () => ({ success: true, data: { id: 'default' } })
       } as any)
 
-      const { updateProfile } = useAdminCms({ client: null })
+      const { updateProfile } = useAdminCms()
       const res = await updateProfile({
         name: '로컬토큰수정',
         position: 'Architect',
@@ -157,7 +157,7 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
   })
 
   describe('useAuth with WAS Gateway and Persistence', () => {
-    it('client가 null일 때 signIn이 성공하면 localStorage에 토큰이 영속화되어야 한다', async () => {
+    it('signIn이 성공하면 localStorage에 토큰이 영속화되어야 한다', async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
@@ -167,7 +167,7 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
         })
       } as any)
 
-      const { signIn, user, isAuthenticated } = useAuth({ client: null, autoInitialize: false })
+      const { signIn, user, isAuthenticated } = useAuth({ autoInitialize: false })
       const res = await signIn('admin@gw.com', 'password123')
 
       expect(res.success).toBe(true)
@@ -183,7 +183,7 @@ describe('WAS API Gateway & Client Integration (Issue #50)', () => {
         json: async () => ({ success: true })
       } as any)
 
-      const { signOut } = useAuth({ client: null, autoInitialize: false })
+      const { signOut } = useAuth({ autoInitialize: false })
       await signOut()
 
       expect(window.localStorage.getItem('resume_admin_token')).toBeNull()
