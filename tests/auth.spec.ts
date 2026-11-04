@@ -7,11 +7,14 @@ import App from '../src/App.vue'
 describe('Admin Authentication & Routing (Issue #15)', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.clear()
+    }
   })
 
   describe('useAuth Composable', () => {
     it('초기 상태에서는 인증되지 않은(unauthenticated) 상태여야 한다', () => {
-      const { user, session, isAuthenticated, loading, error } = useAuth({ client: null })
+      const { user, session, isAuthenticated, loading, error } = useAuth({ autoInitialize: false })
 
       expect(user.value).toBeNull()
       expect(session.value).toBeNull()
@@ -32,19 +35,16 @@ describe('Admin Authentication & Routing (Issue #15)', () => {
         user: mockUser
       }
 
-      const mockClient = {
-        auth: {
-          getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
-          onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
-          signInWithPassword: vi.fn().mockResolvedValue({
-            data: { user: mockUser, session: mockSession },
-            error: null
-          }),
-          signOut: vi.fn().mockResolvedValue({ error: null })
-        }
-      } as any
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          success: true,
+          user: mockUser,
+          session: mockSession
+        })
+      })
 
-      const { user, session, isAuthenticated, signIn, error } = useAuth({ client: mockClient })
+      const { user, session, isAuthenticated, signIn, error } = useAuth({ autoInitialize: false })
 
       const result = await signIn('admin@example.com', 'correct-password')
 
@@ -57,24 +57,16 @@ describe('Admin Authentication & Routing (Issue #15)', () => {
     })
 
     it('완전히 틀린 값: 잘못된 자격증명으로 signIn 시 에러가 기록되고 세션이 없어야 한다', async () => {
-      const authError = {
-        message: 'Invalid login credentials',
-        status: 400
-      }
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: async () => ({
+          success: false,
+          error: 'Invalid login credentials'
+        })
+      })
 
-      const mockClient = {
-        auth: {
-          getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
-          onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
-          signInWithPassword: vi.fn().mockResolvedValue({
-            data: { user: null, session: null },
-            error: authError
-          }),
-          signOut: vi.fn().mockResolvedValue({ error: null })
-        }
-      } as any
-
-      const { user, session, isAuthenticated, signIn, error } = useAuth({ client: mockClient })
+      const { user, session, isAuthenticated, signIn, error } = useAuth({ autoInitialize: false })
 
       const result = await signIn('admin@example.com', 'wrong-password')
 
@@ -87,48 +79,46 @@ describe('Admin Authentication & Routing (Issue #15)', () => {
     })
 
     it('일부만 맞는 값: 빈 이메일 또는 비밀번호 전달 시 조기 거부되어야 한다', async () => {
-      const mockClient = {
-        auth: {
-          getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
-          onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
-          signInWithPassword: vi.fn(),
-          signOut: vi.fn()
-        }
-      } as any
+      const fetchSpy = vi.fn()
+      global.fetch = fetchSpy
 
-      const { signIn, error } = useAuth({ client: mockClient })
+      const { signIn, error } = useAuth({ autoInitialize: false })
 
       const result = await signIn('', 'some-password')
 
       expect(result.success).toBe(false)
       expect(error.value?.message).toContain('이메일과 비밀번호를 모두 입력해주세요')
-      expect(mockClient.auth.signInWithPassword).not.toHaveBeenCalled()
+      expect(fetchSpy).not.toHaveBeenCalled()
     })
 
     it('맞지만 헷갈리는 값: signOut 호출 시 인증 상태가 완전히 초기화되어야 한다', async () => {
       const mockUser = { id: 'usr-1', email: 'admin@example.com' }
       const mockSession = { access_token: 'token-1', user: mockUser }
 
-      const mockClient = {
-        auth: {
-          getSession: vi.fn().mockResolvedValue({ data: { session: mockSession }, error: null }),
-          onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
-          signInWithPassword: vi.fn(),
-          signOut: vi.fn().mockResolvedValue({ error: null })
-        }
-      } as any
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          success: true,
+          user: mockUser,
+          session: mockSession
+        })
+      })
 
-      const { user, session, isAuthenticated, signOut, initialize } = useAuth({ client: mockClient })
+      const { user, session, isAuthenticated, signOut, signIn } = useAuth({ autoInitialize: false })
 
-      await initialize()
+      await signIn('admin@example.com', 'pwd')
       expect(isAuthenticated.value).toBe(true)
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: true })
+      })
 
       await signOut()
 
       expect(user.value).toBeNull()
       expect(session.value).toBeNull()
       expect(isAuthenticated.value).toBe(false)
-      expect(mockClient.auth.signOut).toHaveBeenCalled()
     })
   })
 
@@ -159,19 +149,24 @@ describe('Admin Authentication & Routing (Issue #15)', () => {
     it('폼 제출 시 submit 이벤트 및 입력된 이메일/비밀번호 페이로드가 emit되어야 한다', async () => {
       const wrapper = mount(LoginModal, {
         props: {
-          isOpen: true,
-          loading: false,
-          errorMessage: null
+          isOpen: true
         }
       })
 
-      await wrapper.find('input[type="email"]').setValue('admin@example.com')
-      await wrapper.find('input[type="password"]').setValue('my-secret-pw')
+      const emailInput = wrapper.find('input[type="email"]')
+      const passwordInput = wrapper.find('input[type="password"]')
+
+      await emailInput.setValue('admin@example.com')
+      await passwordInput.setValue('secure-password')
+
       await wrapper.find('form').trigger('submit.prevent')
 
       expect(wrapper.emitted('submit')).toBeTruthy()
       expect(wrapper.emitted('submit')![0]).toEqual([
-        { email: 'admin@example.com', password: 'my-secret-pw' }
+        {
+          email: 'admin@example.com',
+          password: 'secure-password'
+        }
       ])
     })
 

@@ -1,10 +1,8 @@
 import { ref } from 'vue'
-import type { TypedSupabaseClient } from '../lib/supabase'
 import type { Database } from '../types/database.types'
 import { sendCmsToGateway } from '../lib/apiClient'
 
 export interface UseAdminCmsOptions {
-  client?: TypedSupabaseClient | null
   token?: string | null
   onSuccess?: () => Promise<void> | void
 }
@@ -26,7 +24,6 @@ type EtcInsert = Database['public']['Tables']['etc']['Insert']
 type FooterInsert = Database['public']['Tables']['footer']['Insert']
 
 export function useAdminCms(options: UseAdminCmsOptions = {}) {
-  const client = options.client !== undefined ? options.client : null
   const loading = ref<boolean>(false)
   const error = ref<Error | null>(null)
 
@@ -53,24 +50,18 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
   }
 
   const checkClientOrGateway = () => {
-    if (!client && typeof fetch === 'undefined') {
-      return new Error('Supabase 클라이언트 또는 WAS 게이트웨이가 설정되지 않았습니다.')
+    if (typeof fetch === 'undefined') {
+      return new Error('WAS 게이트웨이가 설정되지 않았습니다.')
     }
     return null
   }
 
   const executeUpsert = async (table: string, row: any) => {
-    if (client) {
-      return await (client as any).from(table).upsert(row)
-    }
     const res = await sendCmsToGateway(table, 'upsert', row, getToken())
     return { data: res.data, error: res.error }
   }
 
   const executeDelete = async (table: string, id: string | number) => {
-    if (client) {
-      return await (client as any).from(table).delete().eq('id', id)
-    }
     const res = await sendCmsToGateway(table, 'delete', { id }, getToken())
     return { data: res.data, error: res.error }
   }

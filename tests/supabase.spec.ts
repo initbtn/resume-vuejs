@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createSupabaseClient } from '../src/lib/supabase'
 import { useResumeData } from '../src/composables/useResumeData'
 
 describe('Supabase Client & Composable (Milestone 2 - Issue #4)', () => {
@@ -7,97 +6,62 @@ describe('Supabase Client & Composable (Milestone 2 - Issue #4)', () => {
     vi.restoreAllMocks()
   })
 
-  describe('createSupabaseClient', () => {
-    it('환경변수나 파라미터가 없으면 null을 반환해야 한다', () => {
-      const client = createSupabaseClient('', '')
-      expect(client).toBeNull()
-    })
-
-    it('유효한 url과 anonKey가 주어지면 SupabaseClient 인스턴스를 생성해야 한다', () => {
-      const client = createSupabaseClient(
-        'https://rhkrhkxrnpfnrqxwjojo.supabase.co',
-        'dummy-anon-key'
-      )
-      expect(client).not.toBeNull()
-      expect(client).toBeDefined()
-      expect(typeof client?.from).toBe('function')
-    })
-  })
-
   describe('useResumeData Composable & Fallback 무결성', () => {
-    it('클라이언트가 비활성화 상태일 때 기본 빈 Payload 상태를 유지한다', async () => {
-      const { data, loading, error, source, fetchData } = useResumeData({
-        client: null
-      })
+    it('초기 상태에서는 기본 빈 Payload 상태를 유지한다', async () => {
+      const { data, loading, error, source, fetchData } = useResumeData()
 
       expect(data.value.profile.name).toBe('')
       expect(source.value).toBe('empty')
       expect(loading.value).toBe(false)
       expect(error.value).toBeNull()
 
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: false, data: null })
+      })
+
       await fetchData()
       expect(data.value.profile.name).toBe('')
       expect(source.value).toBe('empty')
     })
 
-    it('Supabase 호출 시 에러가 발생하면 error에 기록하고 빈 상태를 유지한다', async () => {
-      const mockClient = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockResolvedValue({
-            data: null,
-            error: new Error('Network error or table not found')
-          })
-        })
-      } as any
+    it('게이트웨이 호출 시 에러가 발생하면 error에 기록하고 빈 상태를 유지한다', async () => {
+      global.fetch = vi.fn().mockRejectedValue(new Error('Network error or gateway offline'))
 
-      const { data, loading, error, source, fetchData } = useResumeData({
-        client: mockClient
-      })
+      const { data, loading, error, source, fetchData } = useResumeData()
 
       await fetchData()
 
       expect(data.value.profile.name).toBe('')
       expect(source.value).toBe('empty')
       expect(error.value).not.toBeNull()
+      expect(error.value?.message).toContain('Network error or gateway offline')
       expect(loading.value).toBe(false)
     })
 
-    it('Supabase 데이터 조회 성공 시 원격 데이터를 반영하고 source가 supabase가 되어야 한다', async () => {
+    it('게이트웨이 데이터 조회 성공 시 원격 데이터를 반영하고 source가 gateway가 되어야 한다', async () => {
       const mockProfile = {
         name: '홍길동',
-        role: 'Full Stack Engineer',
+        position: 'Full Stack Engineer',
         email: 'test@example.com'
       }
 
-      const mockClient = {
-        from: vi.fn().mockImplementation((table: string) => {
-          if (table === 'profile') {
-            return {
-              select: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({
-                  data: mockProfile,
-                  error: null
-                })
-              })
-            }
-          }
-          return {
-            select: vi.fn().mockResolvedValue({
-              data: null,
-              error: null
-            })
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          success: true,
+          data: {
+            profile: mockProfile
           }
         })
-      } as any
-
-      const { data, source, fetchData } = useResumeData({
-        client: mockClient
       })
+
+      const { data, source, fetchData } = useResumeData()
 
       await fetchData()
 
       expect(data.value.profile.name).toBe('홍길동')
-      expect(source.value).toBe('supabase')
+      expect(source.value).toBe('gateway')
     })
   })
 
@@ -180,69 +144,54 @@ describe('Supabase Client & Composable (Milestone 2 - Issue #4)', () => {
       expect(workflowContent).not.toContain('VITE_SUPABASE_ANON_KEY:')
     })
 
-    it('useResumeData 호출 시 8대 도메인 테이블 전체를 조회해야 한다', async () => {
-      const queriedTables: string[] = []
-      const mockQueryBuilder = {
-        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-        order: vi.fn().mockResolvedValue({ data: [], error: null })
+    it('useResumeData 호출 시 게이트웨이를 통해 8대 도메인 전체 데이터가 수신 및 반영되어야 한다', async () => {
+      const mockFullPayload = {
+        profile: { name: '테스트유저' },
+        introduce: { contents: ['소개 1'] },
+        highlight: { list: [] },
+        skill: { categories: [] },
+        experience: { list: [] },
+        project: { list: [] },
+        education: { list: [] },
+        etc: { certifications: [] },
+        footer: { sign: 'sign' }
       }
-      const mockClient = {
-        from: vi.fn().mockImplementation((table: string) => {
-          queriedTables.push(table)
-          return {
-            select: vi.fn().mockReturnValue(mockQueryBuilder)
-          }
-        })
-      } as any
 
-      const { fetchData } = useResumeData({
-        client: mockClient
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          success: true,
+          data: mockFullPayload
+        })
       })
 
+      const { data, source, fetchData } = useResumeData()
       await fetchData()
 
-      const expectedDomains = ['profile', 'introduce', 'skill', 'experience', 'project', 'education', 'etc', 'footer']
-      for (const domain of expectedDomains) {
-        expect(queriedTables).toContain(domain)
-      }
+      expect(data.value.profile.name).toBe('테스트유저')
+      expect(data.value.introduce.contents).toEqual(['소개 1'])
+      expect(source.value).toBe('gateway')
     })
 
-    it('Supabase에서 { data: null, error } 형태의 API 에러 반환 시 error.value에 에러를 기록하고 fallback되어야 한다', async () => {
-      const postgrestError = {
-        message: 'permission denied for table skill',
-        details: null,
-        hint: null,
-        code: '42501'
-      }
-
-      const mockClient = {
-        from: vi.fn().mockImplementation((table: string) => {
-          return {
-            select: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-              order: vi.fn().mockResolvedValue(
-                table === 'skill'
-                  ? { data: null, error: postgrestError }
-                  : { data: [], error: null }
-              )
-            })
-          }
+    it('게이트웨이 HTTP 에러 반환 시 error.value에 에러를 기록하고 empty 상태를 유지해야 한다', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        json: async () => ({
+          success: false,
+          error: 'Internal Gateway Error'
         })
-      } as any
-
-      const { data, loading, error, source, fetchData } = useResumeData({
-        client: mockClient
       })
+
+      const { data, loading, error, source, fetchData } = useResumeData()
 
       await fetchData()
 
       expect(data.value.skill.categories).toEqual([])
       expect(source.value).toBe('empty')
       expect(error.value).not.toBeNull()
-      expect(error.value?.message).toContain('permission denied for table skill')
+      expect(error.value?.message).toContain('HTTP 500')
       expect(loading.value).toBe(false)
     })
   })
 })
-
-
