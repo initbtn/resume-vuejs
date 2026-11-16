@@ -61,7 +61,8 @@ body {
     display: none !important;
   }
 
-  [data-testid="print-button"] {
+  [data-testid="print-button"],
+  [data-testid="theme-toggle-button"] {
     display: none !important;
   }
 
