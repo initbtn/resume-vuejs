@@ -55,6 +55,21 @@ export const project: IProject = {
       ],
       skills: ["Python 3.12", "FastAPI", "LangChain", "Supabase", "pgvector", "Ollama", "Gemma 3", "Telegram Bot API", "Docker", "GCP"],
       link: "https://github.com/initbtn/assist"
+    },
+    {
+      title: "애자일 스프린트 기획 & Firestore 하이브리드 영속화 엔지니어링 블로그 (domlog)",
+      period: "2026.10 ~ 현재",
+      where: "기술 블로그 및 풀스택 실시간 시스템 (개인 개발)",
+      description: "소프트웨어 아키텍처 및 시스템 엔지니어링 기록을 다루며, Notion 기반 애자일 스프린트 기획 및 Firestore 하이브리드 영속화를 지원하는 Next.js 16 플랫폼 (Vercel 배포)",
+      achievements: [
+        "Notion 칸반·스프린트 기반 백로그 기획 및 1주 단위 스프린트 라이프사이클(User Story, DoD, Sprint Goal) 운영",
+        "스프린트 KPT 회고 체계 수립 및 반복 결함 시 선별적 규칙 피드백 루프(Clean Finish 원칙) 적용",
+        "Cloud Firestore 기반 분산 락킹 세션 스토리지 및 메모리 폴링·쓰기 쓰로틀링(Throttling) 하이브리드 영속화 파이프라인 구축",
+        "서버리스 WAS 게이트웨이를 경유하는 텔레그램 Bot API 양방향 웹훅 수신 및 실시간 릴레이 대시보드(/admin/chat) 구현",
+        "정적 클라이언트 번들 내 DB 자격증명 완전 격리(Zero-Secret Architecture) 및 무료 할당량 최적화 아키텍처 수립"
+      ],
+      skills: ["Next.js 16", "React 19", "TypeScript", "TailwindCSS v4", "Google Cloud Firestore", "Telegram Bot API", "Notion Agile", "Vitest", "Vercel"],
+      link: "https://domlog.vercel.app"
     }
   ]
 };
