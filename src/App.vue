@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useResumeData } from './composables/useResumeData'
 import { initialResumePayload } from './constants/initialPayload'
 import { useAuth } from './composables/useAuth'
+import { useTheme } from './composables/useTheme'
 import Profile from './components/profile/Profile.vue'
 import Introduce from './components/introduce/Introduce.vue'
 import HighlightCards from './components/highlight/HighlightCards.vue'
@@ -20,6 +21,11 @@ const { data: resumeData, fetchData: fetchResumeData } = useResumeData({
   initialData: initialResumePayload
 })
 const { user, isAuthenticated, loading: authLoading, error: authError, signIn, signOut } = useAuth()
+const { isDark, toggleTheme, initTheme } = useTheme()
+
+onMounted(() => {
+  initTheme()
+})
 
 const isLoginModalOpen = ref(false)
 const isCmsModalOpen = ref(false)
@@ -88,9 +94,9 @@ const handleSignOut = async () => {
     </header>
 
     <!-- Main Resume Container (resume.yowu.dev Editorial Single Container) -->
-    <main class="flex-1">
+    <main class="flex-1 bg-white dark:bg-gray-950 transition-colors">
       <div
-        class="resume-container max-w-[840px] mx-auto px-4 md:px-8 py-8 text-gray-800"
+        class="resume-container max-w-[840px] mx-auto px-4 md:px-8 py-8 text-gray-800 dark:text-gray-100"
         data-testid="resume-container"
       >
         <Profile :payload="resumeData.profile" />
@@ -105,15 +111,27 @@ const handleSignOut = async () => {
       </div>
     </main>
 
-    <!-- Floating Actions (우하단): PDF 출력 버튼이 관리자 진입 버튼 위에 쌓인다 -->
+    <!-- Floating Actions (우하단): 테마 토글, PDF 출력, 관리자 버튼 -->
     <div
       data-testid="floating-actions"
       class="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2"
     >
+      <!-- Light / Dark Theme Toggle Button -->
+      <button
+        data-testid="theme-toggle-button"
+        type="button"
+        class="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs font-semibold px-3 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 flex items-center gap-1.5 transition-colors"
+        :title="isDark ? '라이트 모드로 전환' : '다크 모드로 전환'"
+        @click="toggleTheme"
+      >
+        <span v-if="isDark">☀️ 라이트</span>
+        <span v-else>🌙 다크</span>
+      </button>
+
       <button
         data-testid="print-button"
         type="button"
-        class="bg-white hover:bg-gray-100 text-gray-800 text-xs font-semibold px-3 py-2 rounded-full shadow-lg border border-gray-200"
+        class="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs font-semibold px-3 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 transition-colors"
         title="A4 PDF 출력"
         @click="printResume"
       >
