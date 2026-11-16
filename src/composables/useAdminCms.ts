@@ -508,11 +508,12 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
     }
   }
 
-  // 순서 이동: 바뀌는 행을 한 번의 upsert(배열)로 저장한다 — 중간에 실패해도 일부만 반영되지 않는다
+  // 순서 이동: 바뀌는 행을 한 번의 reorder(배열)로 저장한다 — 중간에 실패해도 일부만 반영되지 않는다
   const reorderItems = async (table: ReorderTable, rows: Array<Record<string, any>>): Promise<CmsOperationResult> => {
     error.value = null
     if (rows.length === 0) return { success: true }
-    if (!client) return handleError(new Error('Supabase 클라이언트가 설정되지 않았습니다.'))
+    const gatewayError = checkClientOrGateway()
+    if (gatewayError) return handleError(gatewayError)
     if (rows.some((r) => r.id === undefined || r.id === null)) {
       return handleError(new Error('순서를 바꿀 행의 id 가 없습니다.'))
     }
@@ -529,7 +530,7 @@ export function useAdminCms(options: UseAdminCmsOptions = {}) {
         row.updated_at = now
         return row
       })
-      const { data, error: dbError } = await (client.from(table) as any).upsert(payload)
+      const { data, error: dbError } = await sendCmsToGateway(table, 'reorder', payload, getToken())
       if (dbError) return handleError(dbError)
       return await handleSuccess(data)
     } catch (err) {
