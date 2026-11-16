@@ -35,6 +35,7 @@ const {
   deleteEducation,
   saveEtc,
   deleteEtc,
+  reorderItems,
   updateFooter
 } = useAdminCms({
   onSuccess: async () => {
@@ -109,6 +110,7 @@ const listTabs = {
     ],
     summary: (i: Record<string, any>) => i.title,
     save: saveHighlight,
+    reorder: (rows: Record<string, any>[]) => reorderItems('highlight', rows),
     remove: deleteHighlight
   },
   skill: {
@@ -118,6 +120,7 @@ const listTabs = {
     ],
     summary: (i: Record<string, any>) => `${i.category} (${(i.items ?? []).join(', ')})`,
     save: saveSkill,
+    reorder: (rows: Record<string, any>[]) => reorderItems('skill', rows),
     remove: deleteSkill
   },
   experience: {
@@ -128,6 +131,7 @@ const listTabs = {
     ],
     summary: (i: Record<string, any>) => `${i.company} - ${i.position} ${i.period}`,
     save: saveExperience,
+    reorder: (rows: Record<string, any>[]) => reorderItems('experience', rows),
     remove: deleteExperience
   },
   project: {
@@ -138,6 +142,7 @@ const listTabs = {
     ],
     summary: (i: Record<string, any>) => `${i.title} ${i.period}`,
     save: saveProject,
+    reorder: (rows: Record<string, any>[]) => reorderItems('project', rows),
     remove: deleteProject
   },
   education: {
@@ -148,6 +153,7 @@ const listTabs = {
     ],
     summary: (i: Record<string, any>) => `${i.institution} (${i.course})`,
     save: saveEducation,
+    reorder: (rows: Record<string, any>[]) => reorderItems('education', rows),
     remove: deleteEducation
   },
   etc: {
@@ -158,6 +164,7 @@ const listTabs = {
     ],
     summary: (i: Record<string, any>) => `${i.name} (${i.issuer})`,
     save: saveEtc,
+    reorder: (rows: Record<string, any>[]) => reorderItems('etc', rows),
     remove: deleteEtc
   }
 }
